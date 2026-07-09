@@ -224,7 +224,7 @@ router.get('/map', async (req, res, next) => {
 
     const normalised = waterService.normalisePostcode(postcode)
     const locations = (await waterService.getLocationsByPostcode(normalised)).map(loc => enrichLocation(loc, normalised))
-    const area = waterService.getAreaForPostcode(normalised)
+    const area = await waterService.getAreaForPostcode(normalised)
     const isLiveData = locations.some(loc => loc.isLiveData)
 
     res.render('map', {

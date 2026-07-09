@@ -107,9 +107,35 @@ async function getBathingWaters (eubwids) {
   return results.filter(Boolean)
 }
 
+/**
+ * Fetch nearest designated bathing water EUbWIDs by OSGB grid reference.
+ */
+async function getNearestBathingWaterIds (easting, northing, pageSize = 20) {
+  const east = Math.round(easting)
+  const north = Math.round(northing)
+  const cacheKey = `near:${east}:${north}:${pageSize}`
+  const cached = getCached(cacheKey)
+  if (cached) return cached
+
+  const url = `${BASE_URL}/doc/nearest-bathing-water/easting/${east}/northing/${north}?_pageSize=${pageSize}`
+  const data = await fetchJson(url)
+  const items = data.result?.items || []
+
+  const eubwids = items.map((item) => {
+    const about = item._about || item.bathingWater?._about
+    if (!about) return null
+    const parts = about.split('/')
+    return parts[parts.length - 1]
+  }).filter(Boolean)
+
+  setCache(cacheKey, eubwids)
+  return eubwids
+}
+
 module.exports = {
   getBathingWater,
   getBathingWaters,
+  getNearestBathingWaterIds,
   getSampleAssessment,
   extractText,
   toHttps,

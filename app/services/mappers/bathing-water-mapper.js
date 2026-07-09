@@ -37,11 +37,11 @@ function getCoordinates (bathingWater, sample) {
 
 function getDistrict (bathingWater) {
   const district = bathingWater.district
-  if (!district) return 'Yorkshire'
+  if (!district) return null
   if (Array.isArray(district)) {
-    return extractText(district[0]?.name) || extractText(district[0]) || 'Yorkshire'
+    return extractText(district[0]?.name) || extractText(district[0]) || null
   }
-  return extractText(district?.name) || extractText(district) || 'Yorkshire'
+  return extractText(district?.name) || extractText(district) || null
 }
 
 function getClassification (bathingWater) {

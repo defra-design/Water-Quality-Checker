@@ -26,9 +26,9 @@
     {{ provenanceBannerDemo() }}
     {% endif %}
 
-    {% if overview.isDefaultArea %}
+    {% if overview.isApproximateArea %}
     <div class="govuk-inset-text">
-      <p class="govuk-body">We could not find exact data for this postcode, so we are showing information for the nearest available area ({{ overview.area }}).</p>
+      <p class="govuk-body">We could not find that exact postcode, so results are based on the nearest outcode area ({{ overview.area }}).</p>
     </div>
     {% endif %}
 
@@ -185,9 +185,9 @@
       </summary>
       <div class="govuk-details__text">
         {% if overview.isLiveData %}
-        <p class="govuk-body">Bathing water data is loaded live from the Environment Agency Bathing Water API. Rainfall uses the Met Office Weather DataHub when configured. Sewage, river level, algae and other indicators are not yet connected and are labelled accordingly.</p>
+        <p class="govuk-body">Designated bathing waters are loaded live from the Environment Agency for any valid UK postcode. Rainfall uses the Met Office Weather DataHub when configured. Other indicators are not yet connected and are labelled accordingly.</p>
         {% else %}
-        <p class="govuk-body">This view uses demonstration data structured for user research. Values are illustrative, not official readings. Try a Yorkshire postcode (for example YO11 1AA) to see live bathing water data.</p>
+        <p class="govuk-body">No designated bathing waters were found near this postcode, or the postcode could not be resolved. Try a full UK postcode (for example BH1 3AA, TR7 1PP, or RG4 8BY).</p>
         {% endif %}
       </div>
     </details>

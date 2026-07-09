@@ -21,37 +21,105 @@ Open [http://localhost:3000](http://localhost:3000)
 |---------|-----|-------------|
 | Start | `/` | Service introduction |
 | Postcode search | `/search` | Find water near you |
-| Local overview | `/overview?postcode=RG1%201AA` | Area summary with confidence status |
-| Map and list | `/map?postcode=RG1%201AA` | Map placeholder, list and table views |
+| Local overview | `/overview?postcode=BH1%203AA` | Area summary with confidence status |
+| Map and list | `/map?postcode=BH1%203AA` | Interactive map, list and table views |
 | Location detail | `/location/river-thames-caversham` | Full location information |
 | Ask a question | `/ask` | Conversational Q&A (predefined responses) |
 | Understanding | `/understanding-water-quality` | Educational content |
 
 ### Example postcodes
 
-- `YO11 1AA` – Scarborough (live EA bathing water data)
-- `YO21 1AA` – Whitby (live)
-- `YO15 2AA` – Bridlington (live)
-- `RG1 1AA` – Reading (mock data, Berkshire demo area)
+Any valid UK postcode resolves to the nearest designated bathing waters from the Environment Agency. Try:
 
-### Live API integration
+- `BH1 3AA` – Bournemouth (coastal)
+- `TR7 1PP` – Newquay, Cornwall (coastal)
+- `NE33 2LD` – South Shields (coastal)
+- `YO11 1AA` – Scarborough (coastal)
+- `RG4 8BY` – Reading (inland river bathing waters)
 
-**Environment Agency Bathing Water API** (`https://environment.data.gov.uk/bwq/`) is integrated for Yorkshire postcodes (YO, HU, LS, BD, HG, etc.). The service fetches:
+Legacy demonstration locations (illustrative scenario data) remain available by direct URL, for example `/location/river-thames-caversham`.
 
+## API roadmap
+
+This prototype prioritises **live data over supporting content**. Not every factor marked “Yes” below means point-in-time data at every location — some sources are seasonal classifications, gauged readings near (not at) a site, or values inferred from related indicators.
+
+The UI labels each indicator as **Live data**, **Demonstration data**, **Not connected**, or **Placeholder** so research participants can see what is real versus illustrative.
+
+### Confidence use cases
+
+| Use case | Meaning | Examples |
+|----------|---------|----------|
+| **Today / now** | Useful for “would I go in today?” | Recent rainfall, river level/flow, storm overflow events, latest bacteria sample |
+| **Seasonal / classification** | Official grade or status for a season | Bathing water annual classification, ecological status |
+| **Inferred** | Derived from related data, not a direct measurement | Agricultural pressure from nitrate/phosphate; household pollution from sewer proxies |
+
+### Factors, sources and availability
+
+| Factor | API / data availability | Typical use case | Notes |
+|--------|-------------------------|------------------|-------|
+| Heavy rainfall | **Yes** — [Met Office Weather DataHub](https://datahub.metoffice.gov.uk/); [EA Hydrology API](https://environment.data.gov.uk/hydrology/) | Today / now | Met Office = model/spot totals; EA Hydrology = observed at monitoring stations |
+| Sewage discharges | **Yes** — National Storm Overflow Hub / EDM data | Today / now | Coverage and timeliness vary by water company; event types differ (CSO vs treated effluent) |
+| Agricultural runoff | **Partly** — nitrates, phosphates, pesticides in EA water quality data | Inferred / seasonal | Rarely a single live reading at an exact recreational spot |
+| Industrial pollution | **Partly** — pollution incidents and permits exist; not always a simple API | Today / seasonal | Incidents API ≠ full industrial risk picture |
+| Algal blooms | **Partly** — chemistry/ecology indicators; dedicated bloom alerts are uncommon | Today / seasonal | Often local alerts plus WQ indicators, not a national bloom API |
+| Bacteria / viruses | **Yes** — bathing water monitoring ([EA Bathing Water API](https://environment.data.gov.uk/bwq/)) | Today / seasonal | Strong for **designated bathing waters**; rivers/lakes need different sampling programmes |
+| Water temperature | **Yes** — EA Hydrology / water quality APIs | Today / now | Usually at monitoring stations, matched to nearest site |
+| River flow | **Yes** — [EA Flood Monitoring](https://environment.data.gov.uk/flood-monitoring/) and Hydrology APIs | Today / now | Level and flow often paired at the same station |
+| Ecological health | **Yes / partly** — EA ecology and fish open data | Seasonal | Often open downloads rather than a simple live API |
+| Chemical contaminants | **Yes** — [EA Water Quality Archive](https://environment.data.gov.uk/water-quality/) | Seasonal / inferred | Historical samples; live chemistry at bathing waters is mostly bacteria today |
+| Drinking water treatment | **Partly / no** — water company reports; no neat national public API | N/A | Unlikely to be a core recreational-water indicator |
+| Household pollution | **No direct API** — inferred via sewer/blockage/pollution proxies | Inferred | Treat as supporting context, not a primary signal |
+
+### Integration status in this prototype
+
+| Factor | Status | Implementation |
+|--------|--------|----------------|
+| Heavy rainfall | **Live** (when Met Office key set) | `app/services/clients/met-office-client.js` |
+| Bacteria / viruses | **Live** (designated bathing waters) | `app/services/clients/bathing-water-client.js` |
+| Bathing water classification | **Live** (nationwide) | `app/services/mappers/bathing-water-mapper.js` |
+| Map basemap | **Live** (when OS key set) | `app/services/clients/os-maps-client.js` |
+| Sewage discharges | Not connected | Mock data on Berkshire demo only |
+| River level / flow | Not connected | — |
+| Water temperature | Not connected | — |
+| Agricultural runoff / chemistry | Not connected (except bacteria on live sites) | — |
+| Industrial pollution | Not connected | Mock on Berkshire demo only |
+| Algal blooms | Not connected | — |
+| Ecological health | Not connected | — |
+| Drinking water / household | Not in scope | — |
+
+**Nationwide:** Valid UK postcodes are geocoded via [postcodes.io](https://postcodes.io/) and matched to the nearest designated bathing waters via the EA API. Rainfall is enriched from Met Office when configured. Legacy mock data in `app/data/water-locations.json` is only used for direct location URLs (demonstration scenarios).
+
+### Suggested integration order
+
+Aligned with the “would I feel confident today?” journey for bathing waters:
+
+1. **EA Hydrology + Flood Monitoring** — river level, flow, water temperature at nearest stations
+2. **Storm Overflow Hub / EDM** — recent sewage discharges on overview and location pages
+3. **EA Water Quality** — nitrates, phosphates, turbidity, dissolved oxygen (chemistry table)
+4. **Pollution incidents** — industrial and environmental incident reports (curated where no clean API)
+5. **Algae / ecology** — seasonal and indicator-based signals
+
+### Connected APIs
+
+**Environment Agency Bathing Water API** (`https://environment.data.gov.uk/bwq/`) — any valid UK postcode:
+
+- Nearest designated bathing waters (coastal and inland)
 - Annual compliance classification (2025 season)
 - Latest in-season sample (E. coli, intestinal enterococci)
 - Short-term pollution risk forecast
 - Sampling point coordinates
 
+**Postcode geocoding** — [postcodes.io](https://postcodes.io/) (no API key required)
+
 ```
-app/services/clients/bathing-water-client.js   # API client with 15-min cache
+app/services/clients/postcode-client.js        # UK postcode → lat/lng + grid ref
+app/services/clients/bathing-water-client.js   # EA API client with 15-min cache
 app/services/mappers/bathing-water-mapper.js   # API → location model
-app/data/yorkshire-bathing-waters.json         # 22 Yorkshire bathing waters
 ```
 
-Pending: Flood Monitoring, Water Quality, Hydrology, EDM.
+### Configuring API keys
 
-### Met Office Weather DataHub
+#### Met Office Weather DataHub
 
 Rainfall totals (24h / 48h / 72h) use the **Site-Specific Global Spot** API when your key is subscribed to that product.
 
@@ -105,12 +173,7 @@ app/
 
 ### Service layer
 
-`app/services/water-service.js` separates data from presentation. In production, functions in this module would call live APIs from:
-
-- Environment Agency (hydrology, bathing water, pollution)
-- Met Office (rainfall, weather)
-- Water companies (EDM storm overflow data)
-- Natural England, local authorities, citizen science platforms
+`app/services/water-service.js` orchestrates postcode routing, caching, and enrichment. Client modules live in `app/services/clients/`; API response mapping in `app/services/mappers/`. See [API roadmap](#api-roadmap) for planned integrations.
 
 ### Mock data
 

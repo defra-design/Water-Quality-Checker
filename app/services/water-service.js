@@ -1,24 +1,25 @@
 /**
  * Water Intelligence Service – data access layer
  *
- * Yorkshire bathing waters: live Environment Agency Bathing Water API
- * Berkshire area: mock JSON (pending further API integration)
+ * Nationwide: valid UK postcodes resolve to nearest designated bathing waters
+ * via postcodes.io + Environment Agency Bathing Water API.
+ * Legacy mock locations remain available by ID for demonstration scenarios.
  */
 
 const locations = require('../data/water-locations.json')
-const postcodeAreas = require('../data/postcode-areas.json')
 const questions = require('../data/questions.json')
-const yorkshireBathingWaters = require('../data/yorkshire-bathing-waters.json')
 const bathingWaterClient = require('./clients/bathing-water-client')
+const postcodeClient = require('./clients/postcode-client')
 const metOfficeClient = require('./clients/met-office-client')
 const { mapBathingWaterToLocation } = require('./mappers/bathing-water-mapper')
 
 const POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i
-const YORKSHIRE_PREFIXES = ['YO', 'HU', 'LS', 'WF', 'BD', 'HX', 'HD', 'DN', 'HG', 'S']
+const DEFAULT_NEARBY_COUNT = 20
 
-// In-memory cache of live locations by postcode (short TTL for prototype)
 const liveLocationCache = new Map()
 const LIVE_CACHE_TTL_MS = 10 * 60 * 1000
+
+const geocodeCache = new Map()
 
 function normalisePostcode (postcode) {
   return postcode.trim().toUpperCase().replace(/\s+/g, ' ')
@@ -34,36 +35,51 @@ function getPostcodeOutcode (postcode) {
   return match ? match[1] : null
 }
 
-function isYorkshirePostcode (postcode) {
-  const outcode = getPostcodeOutcode(postcode)
-  if (!outcode) return false
-  return YORKSHIRE_PREFIXES.some(prefix => outcode.startsWith(prefix))
+async function resolvePostcode (postcode) {
+  const normalised = normalisePostcode(postcode)
+  if (geocodeCache.has(normalised)) {
+    return geocodeCache.get(normalised)
+  }
+
+  const geocoded = await postcodeClient.lookupPostcode(normalised)
+  if (geocoded) {
+    geocodeCache.set(normalised, geocoded)
+  }
+  return geocoded
 }
 
-function getAreaForPostcode (postcode) {
-  const outcode = getPostcodeOutcode(postcode)
-  if (!outcode) return null
+async function getAreaForPostcode (postcode) {
+  const normalised = normalisePostcode(postcode)
+  const geocoded = await resolvePostcode(normalised)
 
-  if (postcodeAreas[outcode]) {
-    return { outcode, ...postcodeAreas[outcode] }
-  }
-
-  const partial = Object.keys(postcodeAreas).find(key => outcode.startsWith(key))
-  if (partial) {
-    return { outcode: partial, ...postcodeAreas[partial] }
-  }
-
-  if (isYorkshirePostcode(postcode)) {
+  if (geocoded) {
+    const areaLabel = [geocoded.area, geocoded.region].filter(Boolean).join(', ')
     return {
-      outcode: 'YO11',
-      area: 'North Yorkshire coast',
-      centre: { lat: 54.282, lng: -0.395 },
-      region: 'yorkshire',
-      isDefault: true
+      outcode: geocoded.outcode || getPostcodeOutcode(normalised),
+      area: areaLabel || geocoded.postcode,
+      centre: { lat: geocoded.lat, lng: geocoded.lng },
+      region: slugifyRegion(geocoded.region || geocoded.country),
+      country: geocoded.country,
+      isDefault: geocoded.isApproximate,
+      isApproximate: geocoded.isApproximate,
+      easting: geocoded.easting,
+      northing: geocoded.northing
     }
   }
 
-  return { outcode: 'RG1', ...postcodeAreas.RG1, isDefault: true }
+  return {
+    outcode: getPostcodeOutcode(normalised),
+    area: normalised,
+    centre: { lat: 52.5, lng: -1.5 },
+    region: 'unknown',
+    isDefault: true,
+    isApproximate: true
+  }
+}
+
+function slugifyRegion (name) {
+  if (!name) return 'england'
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
 function haversineKm (lat1, lng1, lat2, lng2) {
@@ -98,8 +114,26 @@ function assignNearbyIds (locations, maxNearby = 3) {
   })
 }
 
-async function fetchYorkshireBathingWaters () {
-  const eubwids = yorkshireBathingWaters.map(bw => bw.eubwid)
+async function fetchBathingWatersNearPostcode (postcode, count = DEFAULT_NEARBY_COUNT) {
+  const geocoded = await resolvePostcode(postcode)
+  if (!geocoded) {
+    throw new Error(`Could not resolve postcode ${postcode}`)
+  }
+
+  if (geocoded.easting == null || geocoded.northing == null) {
+    throw new Error(`Postcode ${postcode} could not be resolved to a grid reference — try a full postcode`)
+  }
+
+  const eubwids = await bathingWaterClient.getNearestBathingWaterIds(
+    geocoded.easting,
+    geocoded.northing,
+    count
+  )
+
+  if (!eubwids.length) {
+    return []
+  }
+
   const records = await bathingWaterClient.getBathingWaters(eubwids)
   return records.map(mapBathingWaterToLocation)
 }
@@ -120,30 +154,33 @@ function setLiveCache (postcode, data) {
 
 async function getLocationsByPostcode (postcode) {
   const normalised = normalisePostcode(postcode)
-  const area = getAreaForPostcode(normalised)
 
-  if (area.region === 'yorkshire' || isYorkshirePostcode(normalised)) {
-    const cached = getLiveCache(normalised)
-    if (cached) return cached
-
-    let bathingLocations = await fetchYorkshireBathingWaters()
-    bathingLocations = sortByDistance(bathingLocations, area.centre)
-    bathingLocations = assignNearbyIds(bathingLocations)
-    bathingLocations = await metOfficeClient.enrichLocationsWithRainfall(bathingLocations)
-    bathingLocations = bathingLocations.map(loc => ({
-      ...loc,
-      postcode: normalised
-    }))
-
-    setLiveCache(normalised, bathingLocations)
-    return bathingLocations
+  if (!isValidPostcode(normalised)) {
+    return []
   }
 
-  if (area.locationIds) {
-    return getLocationsByIds(area.locationIds)
-  }
+  const cached = getLiveCache(normalised)
+  if (cached) return cached
 
-  return []
+  const area = await getAreaForPostcode(normalised)
+
+  let bathingLocations = []
+  try {
+    bathingLocations = await fetchBathingWatersNearPostcode(normalised)
+  } catch (err) {
+    console.error(`Bathing water lookup failed for ${normalised}:`, err.message)
+    return []
+  }
+  bathingLocations = sortByDistance(bathingLocations, area.centre)
+  bathingLocations = assignNearbyIds(bathingLocations)
+  bathingLocations = await metOfficeClient.enrichLocationsWithRainfall(bathingLocations)
+  bathingLocations = bathingLocations.map(loc => ({
+    ...loc,
+    postcode: normalised
+  }))
+
+  setLiveCache(normalised, bathingLocations)
+  return bathingLocations
 }
 
 async function getLocationById (id) {
@@ -162,7 +199,7 @@ function getLocationsByIds (ids) {
 }
 
 async function getOverviewForPostcode (postcode) {
-  const area = getAreaForPostcode(postcode)
+  const area = await getAreaForPostcode(postcode)
   const nearbyLocations = await getLocationsByPostcode(postcode)
 
   const statusCounts = { good: 0, caution: 0, poor: 0 }
@@ -199,8 +236,10 @@ async function getOverviewForPostcode (postcode) {
     postcode: normalisePostcode(postcode),
     area: area.area,
     centre: area.centre,
-    region: area.region || (isYorkshirePostcode(postcode) ? 'yorkshire' : 'berkshire'),
+    region: area.region,
+    country: area.country,
     isDefaultArea: area.isDefault || false,
+    isApproximateArea: area.isApproximate || false,
     isLiveData,
     isMetOfficeConnected: metOfficeClient.isConfigured(),
     overallConfidence,
@@ -215,26 +254,32 @@ async function getOverviewForPostcode (postcode) {
     pollutionIncidents,
     healthWarnings,
     avgRainfall,
-    summary: buildOverviewSummary(overallConfidence, sewageDischarges, algaeAlerts, pollutionIncidents, avgRainfall, isLiveData)
+    summary: buildOverviewSummary(overallConfidence, sewageDischarges, algaeAlerts, pollutionIncidents, avgRainfall, isLiveData, nearbyLocations.length)
   }
 }
 
-function buildOverviewSummary (confidence, sewage, algae, pollution, rainfall, isLiveData) {
+function buildOverviewSummary (confidence, sewage, algae, pollution, rainfall, isLiveData, locationCount) {
   const parts = []
 
   if (isLiveData) {
-    parts.push('Bathing water data is live from the Environment Agency.')
+    parts.push(`Showing ${locationCount} nearest designated bathing waters from the Environment Agency.`)
     if (rainfall != null) {
       parts.push('Rainfall totals are from the Met Office.')
     }
+  } else if (locationCount === 0) {
+    parts.push('No designated bathing waters were found near this postcode.')
+  }
+
+  if (locationCount === 0) {
+    return parts.join(' ') || 'No water locations found for this postcode.'
   }
 
   if (confidence === 'good') {
-    parts.push('Conditions across your area are generally good for recreational water use.')
+    parts.push('Conditions across nearby bathing waters are generally good for recreational water use.')
   } else if (confidence === 'caution') {
-    parts.push('Some locations near you need extra caution today.')
+    parts.push('Some nearby bathing waters need extra caution.')
   } else {
-    parts.push('Several locations near you have poor conditions. Check individual locations before visiting.')
+    parts.push('Several nearby bathing waters have poor conditions. Check individual locations before visiting.')
   }
 
   if (sewage.length > 0) {
@@ -331,7 +376,6 @@ module.exports = {
   isValidPostcode,
   normalisePostcode,
   getAreaForPostcode,
-  isYorkshirePostcode,
   getAllLocations,
   getLocationById,
   getLocationsByIds,
