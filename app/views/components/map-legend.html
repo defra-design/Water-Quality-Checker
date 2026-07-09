@@ -2,7 +2,8 @@
   Map legend – accessible key for map status colours (not colour alone)
 #}
 
-{% macro mapLegend() %}
+{% macro mapLegend(isOsMapsConnected) %}
+{% from "components/data-provenance.html" import provenanceTag %}
 <nav class="wis-map-legend" aria-label="Map legend">
   <h2 class="govuk-heading-s">What the symbols mean</h2>
   <ul class="govuk-list wis-map-legend__list">
@@ -19,6 +20,13 @@
       <strong>Poor</strong> – avoid contact with the water
     </li>
   </ul>
+  <p class="govuk-body-s govuk-!-margin-bottom-1">
+    {% if isOsMapsConnected %}
+    {{ provenanceTag('live') }} Basemap: Ordnance Survey Maps API
+    {% else %}
+    {{ provenanceTag('placeholder') }} Basemap: OpenFreeMap (add OS Maps API key for Ordnance Survey tiles)
+    {% endif %}
+  </p>
   <p class="govuk-body-s">You do not need to use the map to find information. Use the list or table view below for the same details.</p>
 </nav>
 {% endmacro %}

@@ -69,6 +69,27 @@ heroku config:set MET_OFFICE_GLOBAL_SPOT_API_KEY=your-global-spot-key -a your-ap
 heroku config:set MET_OFFICE_LAND_OBS_API_KEY=your-land-obs-key -a your-app-name
 ```
 
+### Ordnance Survey Maps API
+
+The map basemap uses the [OS Maps API](https://osdatahub.os.uk/) when `OS_MAPS_API_KEY` is set. Without it, OpenFreeMap tiles are used as a placeholder.
+
+1. Create a project at [OS Data Hub](https://osdatahub.os.uk/) and add **OS Maps API**
+2. Copy your **Project API Key**
+
+**Local** — add to `.env`:
+
+```
+OS_MAPS_API_KEY=your-os-project-api-key
+```
+
+Optional style (Web Mercator): `OS_MAPS_LAYER=Outdoor_3857` (default), `Road_3857`, or `Light_3857`
+
+**Heroku:**
+
+```bash
+heroku config:set OS_MAPS_API_KEY=your-os-project-api-key -a your-app-name
+```
+
 ## Architecture
 
 ```
@@ -102,7 +123,7 @@ app/
 
 ### Map
 
-The map uses the [Defra Interactive Map](https://github.com/DEFRA/interactive-map) (`@defra/interactive-map`) with the MapLibre provider. List and table views provide accessible alternatives.
+The map uses the [Defra Interactive Map](https://github.com/DEFRA/interactive-map) (`@defra/interactive-map`) with the MapLibre provider. With an OS Maps API key, basemap tiles come from Ordnance Survey; otherwise OpenFreeMap is used. List and table views provide accessible alternatives.
 
 Registered as a GOV.UK Prototype Kit plugin in `app/config.json`. Marker selection shows a summary panel with a link to the full location page.
 

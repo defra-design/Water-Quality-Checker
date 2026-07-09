@@ -9,6 +9,7 @@ const router = govukPrototypeKit.requests.setupRouter()
 const waterService = require('./services/water-service')
 const dataProvenance = require('./config/data-provenance')
 const metOfficeClient = require('./services/clients/met-office-client')
+const osMapsClient = require('./services/clients/os-maps-client')
 
 const chemistryLabels = {
   eColi: 'E. coli',
@@ -112,6 +113,8 @@ function buildMapConfig (locations, postcode, areaName) {
       lats.reduce((a, b) => a + b, 0) / lats.length
     ],
     postcode,
+    mapStyle: osMapsClient.getMapStyleConfig(),
+    isOsMapsConnected: osMapsClient.isConfigured(),
     locations: locations.map(location => ({
       id: location.id,
       name: location.name,
@@ -146,6 +149,14 @@ function buildMapTableRows (locations, postcode) {
 }
 
 // Postcode search
+router.get('/map/os-style', (req, res) => {
+  if (!osMapsClient.isConfigured()) {
+    return res.status(404).json({ error: 'OS Maps API not configured' })
+  }
+  res.set('Cache-Control', 'private, no-store')
+  res.json(osMapsClient.getMapLibreStyle())
+})
+
 router.get('/search', (req, res) => {
   res.render('search', { postcode: req.query.postcode || '' })
 })
@@ -222,6 +233,8 @@ router.get('/map', async (req, res, next) => {
       isLiveData,
       isMockData: !isLiveData,
       isMetOfficeConnected: metOfficeClient.isConfigured(),
+      isOsMapsConnected: osMapsClient.isConfigured(),
+      mapStyle: osMapsClient.getMapStyleConfig(),
       tableRows: buildMapTableRows(locations, normalised),
       mapConfig: buildMapConfig(locations, normalised, area.area)
     })

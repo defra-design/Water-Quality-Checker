@@ -22,7 +22,7 @@ window.GOVUKPrototypeKit.documentReady(() => {
     mapLabel: mapData.mapLabel,
     pageTitle: mapData.pageTitle,
     mapProvider: defra.maplibreProvider(),
-    mapStyle: {
+    mapStyle: mapData.mapStyle || {
       url: 'https://tiles.openfreemap.org/styles/liberty',
       attribution: 'OpenFreeMap © OpenMapTiles Data from OpenStreetMap',
       backgroundColor: '#f5f5f0'

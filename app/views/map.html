@@ -4,7 +4,7 @@
 {% from "components/map-legend.html" import mapLegend %}
 {% from "components/location-summary.html" import locationSummary %}
 {% from "components/service-nav.html" import serviceNavigation %}
-{% from "components/data-provenance.html" import provenanceBannerLive, provenanceBannerDemo, provenanceLegend %}
+{% from "components/data-provenance.html" import provenanceBannerLive, provenanceBannerDemo, provenanceLegend, provenanceTag %}
 
 {% set pageName="Map and list" %}
 
@@ -34,7 +34,13 @@
     {{ provenanceBannerDemo() }}
     {% endif %}
 
-    {{ mapLegend() }}
+    {% if isOsMapsConnected %}
+    <p class="govuk-body">{{ provenanceTag('live') }} Basemap from Ordnance Survey Maps API ({{ mapStyle.layer | replace('_3857', '') }} style)</p>
+    {% else %}
+    <p class="govuk-body">{{ provenanceTag('placeholder') }} Basemap uses OpenFreeMap until <code>OS_MAPS_API_KEY</code> is configured</p>
+    {% endif %}
+
+    {{ mapLegend(isOsMapsConnected) }}
 
     <div class="wis-map-container">
       <div id="wis-map" aria-label="Interactive map of nearby water locations"></div>
