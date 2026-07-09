@@ -14,7 +14,7 @@ function getRainfallProvenance (location) {
 
 function getChemistryProvenance (location, key) {
   if (!location.isLiveData) return 'demo'
-  if (['eColi', 'intestinalEnterococci'].includes(key)) {
+  if (['eColi', 'intestinalEnterococci', 'ph', 'ammonia', 'dissolvedOxygen'].includes(key)) {
     return location.waterChemistry[key]?.value != null ? 'live' : 'pending'
   }
   return 'pending'

@@ -13,6 +13,7 @@ const postcodeClient = require('./clients/postcode-client')
 const metOfficeClient = require('./clients/met-office-client')
 const hydrologyClient = require('./clients/hydrology-client')
 const stormOverflowClient = require('./clients/storm-overflow-client')
+const waterQualityClient = require('./clients/water-quality-client')
 const { mapBathingWaterToLocation } = require('./mappers/bathing-water-mapper')
 
 const POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i
@@ -196,6 +197,7 @@ async function getLocationById (id) {
     let enriched = await metOfficeClient.enrichLocationsWithRainfall([location])
     enriched = await stormOverflowClient.enrichLocationsWithStormOverflows(enriched)
     enriched = await hydrologyClient.enrichLocationsWithRiverConditions(enriched)
+    enriched = await waterQualityClient.enrichLocationsWithWaterChemistry(enriched)
     return enriched[0]
   }
   return locations.find(loc => loc.id === id) || null

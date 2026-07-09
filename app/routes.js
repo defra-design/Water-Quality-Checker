@@ -264,7 +264,10 @@ router.get('/location/:id', async (req, res, next) => {
       value: reading.value,
       unit: reading.unit,
       status: reading.status,
-      dataType: dataProvenance.getChemistryProvenance(location, key)
+      dataType: dataProvenance.getChemistryProvenance(location, key),
+      sampleNote: reading.isLiveData && reading.sampledAt
+        ? `${waterService.formatRelativeTime(reading.sampledAt)}${reading.stationName ? ` at ${reading.stationName}` : ''}`
+        : null
     }))
 
     res.render('location', {

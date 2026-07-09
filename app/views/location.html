@@ -22,7 +22,7 @@
     {{ provenanceLegend() }}
 
     {% if location.isLiveData %}
-    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true, location.recentSewageDischarge.isLiveData) }}
+    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true, location.recentSewageDischarge.isLiveData, location.waterChemistry.ph.isLiveData) }}
     <p class="govuk-body">
       {{ provenanceTag('live') }}
       {% if location.recentRainfall.isLiveData %}
@@ -186,7 +186,12 @@
                 <th scope="row" class="govuk-table__header">{{ reading.label }}</th>
                 <td class="govuk-table__cell">{% if reading.value != null %}{{ reading.value }} {{ reading.unit }}{% else %}n/a{% endif %}</td>
                 <td class="govuk-table__cell">{{ reading.status }}</td>
-                <td class="govuk-table__cell">{{ provenanceTag(reading.dataType) }}</td>
+                <td class="govuk-table__cell">
+                  {{ provenanceTag(reading.dataType) }}
+                  {% if reading.sampleNote %}
+                  <div class="govuk-body-s govuk-!-margin-bottom-0 govuk-!-margin-top-1">Sampled {{ reading.sampleNote }}</div>
+                  {% endif %}
+                </td>
               </tr>
               {% endfor %}
             </tbody>

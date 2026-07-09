@@ -15,11 +15,11 @@ function wait (ms) {
 /**
  * Fetch JSON with retry-with-backoff on rate-limit / transient errors.
  */
-async function fetchJsonWithRetry (url, { headers = { Accept: 'application/json' }, retries = DEFAULT_RETRIES, errorPrefix = 'API' } = {}) {
+async function fetchJsonWithRetry (url, { headers = { Accept: 'application/json' }, method = 'GET', body, retries = DEFAULT_RETRIES, errorPrefix = 'API' } = {}) {
   let attempt = 0
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const response = await fetch(url, { headers })
+    const response = await fetch(url, { method, headers, body })
     if (response.ok) {
       return response.json()
     }
