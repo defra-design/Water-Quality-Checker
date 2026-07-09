@@ -6,6 +6,7 @@
 {% from "components/timeline.html" import timeline %}
 {% from "components/location-summary.html" import locationSummary %}
 {% from "components/service-nav.html" import serviceNavigation %}
+{% from "components/data-provenance.html" import provenanceTag, provenanceBannerLive, provenanceBannerDemo, provenanceLegend %}
 
 {% set pageName=location.name %}
 
@@ -17,6 +18,21 @@
 
     <span class="govuk-caption-l">{{ location.waterbodyTypeLabel }} · {{ location.location }}</span>
     <h1 class="govuk-heading-l">{{ location.name }}</h1>
+
+    {{ provenanceLegend() }}
+
+    {% if location.isLiveData %}
+    {{ provenanceBannerLive(location.recentRainfall.isLiveData) }}
+    <p class="govuk-body">
+      {{ provenanceTag('live') }}
+      {% if location.recentRainfall.isLiveData %}
+      <span class="govuk-body-s">· Rainfall from Met Office</span>
+      {% endif %}
+    </p>
+    {% else %}
+    {{ provenanceBannerDemo() }}
+    <p class="govuk-body">{{ provenanceTag('demo') }}</p>
+    {% endif %}
 
     {{ statusCard(
       location.overallStatus,
@@ -63,6 +79,11 @@
           </tr>
         </tbody>
       </table>
+      {% if location.isLiveData %}
+      <p class="govuk-body-s">{{ provenanceTag('live') }} Activity advice is derived from live bathing water classification.</p>
+      {% else %}
+      <p class="govuk-body-s">{{ provenanceTag('demo') }} Activity advice is derived from demonstration scenario data.</p>
+      {% endif %}
     </section>
 
     <section class="govuk-!-margin-bottom-6" aria-labelledby="conditions-heading">
@@ -70,16 +91,41 @@
       <p class="govuk-body-s">What we know about conditions now and what they mean in plain English.</p>
 
       <div class="wis-indicator-grid">
+        {% if location.recentRainfall.last24h != null %}
         {% set rainfallStatus = "elevated" if location.recentRainfall.last24h > 10 else "normal" %}
         {{ waterIndicator(
           "Rainfall (24 hours)",
           location.recentRainfall.last24h,
           "mm",
           rainfallStatus,
-          location.recentRainfall.summary
+          location.recentRainfall.summary,
+          null,
+          rainfallProvenance
         ) }}
+        {% elif location.recentRainfall.needsGlobalSpotSubscription %}
+        {{ waterIndicator(
+          "Rainfall (24 hours)",
+          "—",
+          null,
+          null,
+          location.recentRainfall.summary,
+          null,
+          "pending"
+        ) }}
+        {% else %}
+        {{ waterIndicator(
+          "Rainfall (24 hours)",
+          "—",
+          null,
+          null,
+          "Add MET_OFFICE_GLOBAL_SPOT_API_KEY to .env or Heroku config to enable Met Office rainfall data.",
+          null,
+          "pending"
+        ) }}
+        {% endif %}
 
         {% if location.riverLevel %}
+        {% set riverProvenance = "pending" if location.isLiveData else "demo" %}
         {% set riverLevelExplanation = "Normal range: " ~ location.riverLevel.normalRange ~ ". " ~ (location.riverLevel.status | capitalize) ~ " levels can affect safety near the bank." %}
         {{ waterIndicator(
           "River level",
@@ -87,29 +133,36 @@
           location.riverLevel.unit,
           location.riverLevel.status,
           riverLevelExplanation,
-          location.riverLevel.trend
+          location.riverLevel.trend,
+          riverProvenance
         ) }}
         {% endif %}
 
         {% if location.flow %}
+        {% set flowProvenance = "pending" if location.isLiveData else "demo" %}
         {{ waterIndicator(
           "River flow",
           location.flow.value,
           location.flow.unit,
           location.flow.status,
           "How fast water is moving. High flow after rain is common but can carry more sediment and pollutants.",
-          location.flow.trend
+          location.flow.trend,
+          flowProvenance
         ) }}
         {% endif %}
 
+        {% if location.waterTemperature.value != null %}
+        {% set tempProvenance = "pending" if location.isLiveData else "demo" %}
         {{ waterIndicator(
           "Water temperature",
           location.waterTemperature.value,
           location.waterTemperature.unit,
           null,
           "Warmer water can encourage algae growth.",
-          location.waterTemperature.trend
+          location.waterTemperature.trend,
+          tempProvenance
         ) }}
+        {% endif %}
       </div>
 
       <details class="govuk-details govuk-!-margin-top-4">
@@ -123,14 +176,16 @@
                 <th scope="col" class="govuk-table__header">Indicator</th>
                 <th scope="col" class="govuk-table__header">Value</th>
                 <th scope="col" class="govuk-table__header">Status</th>
+                <th scope="col" class="govuk-table__header">Source</th>
               </tr>
             </thead>
             <tbody class="govuk-table__body">
               {% for reading in chemistryRows %}
               <tr class="govuk-table__row">
                 <th scope="row" class="govuk-table__header">{{ reading.label }}</th>
-                <td class="govuk-table__cell">{{ reading.value }} {{ reading.unit }}</td>
+                <td class="govuk-table__cell">{% if reading.value != null %}{{ reading.value }} {{ reading.unit }}{% else %}n/a{% endif %}</td>
                 <td class="govuk-table__cell">{{ reading.status }}</td>
+                <td class="govuk-table__cell">{{ provenanceTag(reading.dataType) }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -143,6 +198,7 @@
     {% if location.bathingWaterWarning %}
     <section class="govuk-!-margin-bottom-6" aria-labelledby="bathing-heading">
       <h2 class="govuk-heading-m" id="bathing-heading">Bathing water information</h2>
+      {% if location.isLiveData %}{{ provenanceTag('live') }}{% else %}{{ provenanceTag('demo') }}{% endif %}
       <div class="govuk-inset-text">
         <p class="govuk-body"><strong>Season classification:</strong> {{ location.bathingWaterWarning.seasonClassification }}</p>
         <p class="govuk-body">{{ location.bathingWaterWarning.advisory }}</p>
@@ -167,11 +223,12 @@
 
     <section class="govuk-!-margin-bottom-6" aria-labelledby="timeline-heading">
       <h2 class="govuk-heading-m" id="timeline-heading">Recent events</h2>
+      {% if location.isLiveData %}{{ provenanceTag('live') }}{% else %}{{ provenanceTag('demo') }}{% endif %}
       {{ timeline(timelineEvents) }}
     </section>
 
     <section class="govuk-!-margin-bottom-6" aria-labelledby="trend-heading">
-      <h2 class="govuk-heading-m" id="trend-heading">Historical trend</h2>
+      <h2 class="govuk-heading-m" id="trend-heading">Historical trend {{ provenanceTag('placeholder') }}</h2>
       <div class="wis-trend-placeholder govuk-inset-text">
         <p class="govuk-body"><strong>Chart placeholder</strong></p>
         <p class="govuk-body-s">A future version would show trends in bacteria levels, river flow and rainfall over weeks and months. This would connect to Environment Agency historical data APIs.</p>

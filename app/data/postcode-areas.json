@@ -1,7 +1,68 @@
 {
+  "YO11": {
+    "area": "Scarborough, North Yorkshire",
+    "centre": { "lat": 54.282, "lng": -0.395 },
+    "region": "yorkshire"
+  },
+  "YO12": {
+    "area": "Scarborough, North Yorkshire",
+    "centre": { "lat": 54.255, "lng": -0.405 },
+    "region": "yorkshire"
+  },
+  "YO14": {
+    "area": "Filey, North Yorkshire",
+    "centre": { "lat": 54.208, "lng": -0.292 },
+    "region": "yorkshire"
+  },
+  "YO21": {
+    "area": "Whitby, North Yorkshire",
+    "centre": { "lat": 54.486, "lng": -0.616 },
+    "region": "yorkshire"
+  },
+  "YO22": {
+    "area": "Robin Hood's Bay, North Yorkshire",
+    "centre": { "lat": 54.431, "lng": -0.533 },
+    "region": "yorkshire"
+  },
+  "YO15": {
+    "area": "Bridlington, East Riding of Yorkshire",
+    "centre": { "lat": 54.084, "lng": -0.200 },
+    "region": "yorkshire"
+  },
+  "YO16": {
+    "area": "Bridlington, East Riding of Yorkshire",
+    "centre": { "lat": 54.090, "lng": -0.190 },
+    "region": "yorkshire"
+  },
+  "HU17": {
+    "area": "Hornsea, East Riding of Yorkshire",
+    "centre": { "lat": 53.910, "lng": -0.168 },
+    "region": "yorkshire"
+  },
+  "HU18": {
+    "area": "Hornsea, East Riding of Yorkshire",
+    "centre": { "lat": 53.902, "lng": -0.155 },
+    "region": "yorkshire"
+  },
+  "LS": {
+    "area": "Leeds, West Yorkshire",
+    "centre": { "lat": 53.800, "lng": -1.549 },
+    "region": "yorkshire"
+  },
+  "BD": {
+    "area": "Bradford, West Yorkshire",
+    "centre": { "lat": 53.796, "lng": -1.759 },
+    "region": "yorkshire"
+  },
+  "HG": {
+    "area": "Harrogate, North Yorkshire",
+    "centre": { "lat": 53.992, "lng": -1.541 },
+    "region": "yorkshire"
+  },
   "RG1": {
     "area": "Reading, Berkshire",
     "centre": { "lat": 51.4543, "lng": -0.9731 },
+    "region": "berkshire",
     "locationIds": [
       "river-thames-caversham",
       "river-kennet-reading",
@@ -14,6 +75,7 @@
   "RG4": {
     "area": "Caversham, Berkshire",
     "centre": { "lat": 51.4672, "lng": -0.9695 },
+    "region": "berkshire",
     "locationIds": [
       "river-thames-caversham",
       "river-kennet-reading",
@@ -26,6 +88,7 @@
   "RG10": {
     "area": "Twyford, Berkshire",
     "centre": { "lat": 51.4367, "lng": -0.8892 },
+    "region": "berkshire",
     "locationIds": [
       "dinton-pastures-lake",
       "river-loddon-winnersh",
@@ -37,6 +100,7 @@
   "OX10": {
     "area": "Wallingford, Oxfordshire",
     "centre": { "lat": 51.5998, "lng": -1.1248 },
+    "region": "berkshire",
     "locationIds": [
       "river-thames-wallingford",
       "river-thames-caversham",
@@ -46,6 +110,7 @@
   "SL3": {
     "area": "Datchet, Berkshire",
     "centre": { "lat": 51.4845, "lng": -0.5412 },
+    "region": "berkshire",
     "locationIds": [
       "queen-mother-reservoir",
       "river-thames-caversham",

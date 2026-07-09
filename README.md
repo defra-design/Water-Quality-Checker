@@ -29,9 +29,45 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Example postcodes
 
-- `RG1 1AA` – Reading
-- `RG4 8BY` – Caversham
-- `OX10 0EB` – Wallingford
+- `YO11 1AA` – Scarborough (live EA bathing water data)
+- `YO21 1AA` – Whitby (live)
+- `YO15 2AA` – Bridlington (live)
+- `RG1 1AA` – Reading (mock data, Berkshire demo area)
+
+### Live API integration
+
+**Environment Agency Bathing Water API** (`https://environment.data.gov.uk/bwq/`) is integrated for Yorkshire postcodes (YO, HU, LS, BD, HG, etc.). The service fetches:
+
+- Annual compliance classification (2025 season)
+- Latest in-season sample (E. coli, intestinal enterococci)
+- Short-term pollution risk forecast
+- Sampling point coordinates
+
+```
+app/services/clients/bathing-water-client.js   # API client with 15-min cache
+app/services/mappers/bathing-water-mapper.js   # API → location model
+app/data/yorkshire-bathing-waters.json         # 22 Yorkshire bathing waters
+```
+
+Pending: Flood Monitoring, Water Quality, Hydrology, EDM.
+
+### Met Office Weather DataHub
+
+Rainfall totals (24h / 48h / 72h) use the **Site-Specific Global Spot** API when your key is subscribed to that product.
+
+**Local:**
+```bash
+cp .env.example .env
+# Add your key to .env, then restart npm run dev
+```
+
+If you only have **Land Observations** subscribed, the service will resolve the nearest UK weather station but rainfall totals will show as pending until you also subscribe to Global Spot (free tier available on Weather DataHub).
+
+**Heroku:**
+```bash
+heroku config:set MET_OFFICE_GLOBAL_SPOT_API_KEY=your-global-spot-key -a your-app-name
+heroku config:set MET_OFFICE_LAND_OBS_API_KEY=your-land-obs-key -a your-app-name
+```
 
 ## Architecture
 

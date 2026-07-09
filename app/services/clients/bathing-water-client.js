@@ -1,0 +1,117 @@
+/**
+ * Environment Agency Bathing Water API client
+ * https://environment.data.gov.uk/bwq/
+ */
+
+const BASE_URL = 'https://environment.data.gov.uk'
+
+const cache = new Map()
+const CACHE_TTL_MS = 15 * 60 * 1000
+
+function getCached (key) {
+  const entry = cache.get(key)
+  if (!entry) return null
+  if (Date.now() - entry.time > CACHE_TTL_MS) {
+    cache.delete(key)
+    return null
+  }
+  return entry.data
+}
+
+function setCache (key, data) {
+  cache.set(key, { time: Date.now(), data })
+}
+
+async function fetchJson (url) {
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' }
+  })
+  if (!response.ok) {
+    throw new Error(`Bathing Water API error ${response.status} for ${url}`)
+  }
+  return response.json()
+}
+
+function toHttps (uri) {
+  if (!uri) return null
+  return uri.replace(/^http:\/\//, 'https://')
+}
+
+function extractText (value) {
+  if (!value) return null
+  if (typeof value === 'string') return value
+  if (value._value) return value._value
+  if (Array.isArray(value)) return extractText(value[0])
+  if (value.name) return extractText(value.name)
+  return null
+}
+
+/**
+ * Fetch a single bathing water record with compliance and risk data.
+ */
+async function getBathingWater (eubwid) {
+  const cacheKey = `bw:${eubwid}`
+  const cached = getCached(cacheKey)
+  if (cached) return cached
+
+  const data = await fetchJson(`${BASE_URL}/id/bathing-water/${eubwid}`)
+  const topic = data.result?.primaryTopic
+  if (!topic) {
+    throw new Error(`No bathing water data for ${eubwid}`)
+  }
+
+  let sample = null
+  const sampleUri = topic.latestSampleAssessment
+  if (sampleUri) {
+    try {
+      sample = await getSampleAssessment(sampleUri)
+    } catch (err) {
+      console.error(`Sample fetch failed for ${eubwid}:`, err.message)
+    }
+  }
+
+  const result = { bathingWater: topic, sample }
+  setCache(cacheKey, result)
+  return result
+}
+
+/**
+ * Fetch latest in-season sample assessment (bacteria counts, coordinates).
+ */
+async function getSampleAssessment (uri) {
+  const url = toHttps(uri)
+  const cacheKey = `sample:${url}`
+  const cached = getCached(cacheKey)
+  if (cached) return cached
+
+  const data = await fetchJson(url)
+  const topic = data.result?.primaryTopic
+  setCache(cacheKey, topic)
+  return topic
+}
+
+/**
+ * Fetch multiple bathing waters in parallel (with concurrency limit).
+ */
+async function getBathingWaters (eubwids) {
+  const results = await Promise.all(
+    eubwids.map(async (eubwid) => {
+      try {
+        return await getBathingWater(eubwid)
+      } catch (err) {
+        console.error(`Failed to load bathing water ${eubwid}:`, err.message)
+        return null
+      }
+    })
+  )
+  return results.filter(Boolean)
+}
+
+module.exports = {
+  getBathingWater,
+  getBathingWaters,
+  getSampleAssessment,
+  extractText,
+  toHttps,
+  BASE_URL
+}

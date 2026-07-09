@@ -1,0 +1,47 @@
+{#
+  Data provenance labels – live API data vs demonstration / pending fields
+  Types: live | demo | pending | placeholder
+#}
+
+{% macro provenanceTag(type) %}
+{% if type == 'live' %}
+<strong class="govuk-tag govuk-tag--blue wis-provenance-tag">Live data</strong>
+{% elif type == 'demo' %}
+<strong class="govuk-tag govuk-tag--grey wis-provenance-tag">Demonstration data</strong>
+{% elif type == 'pending' %}
+<strong class="govuk-tag govuk-tag--yellow wis-provenance-tag">Not connected</strong>
+{% elif type == 'placeholder' %}
+<strong class="govuk-tag govuk-tag--grey wis-provenance-tag">Placeholder</strong>
+{% endif %}
+{% endmacro %}
+
+{% macro provenanceLegend() %}
+<div class="wis-provenance-legend govuk-!-margin-bottom-4" aria-label="Data source key">
+  <p class="govuk-body-s govuk-!-margin-bottom-2"><strong>Data source key</strong></p>
+  <ul class="govuk-list wis-provenance-legend__list">
+    <li>{{ provenanceTag('live') }} Official API</li>
+    <li>{{ provenanceTag('demo') }} Illustrative values for user research</li>
+    <li>{{ provenanceTag('pending') }} Awaiting API integration</li>
+    <li>{{ provenanceTag('placeholder') }} UI placeholder only</li>
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro provenanceBannerLive(isMetOfficeConnected) %}
+<div class="govuk-inset-text wis-provenance-banner wis-provenance-banner--live">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Live data in this view:</strong>
+    bathing water from the Environment Agency{% if isMetOfficeConnected %}; rainfall from the Met Office when shown{% endif %}.
+    Other indicators may still be demonstration data or not yet connected — see labels on each section.
+  </p>
+</div>
+{% endmacro %}
+
+{% macro provenanceBannerDemo() %}
+<div class="govuk-inset-text wis-provenance-banner wis-provenance-banner--demo">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Demonstration data:</strong>
+    values on this page are illustrative mock data for user research, not official readings.
+  </p>
+</div>
+{% endmacro %}

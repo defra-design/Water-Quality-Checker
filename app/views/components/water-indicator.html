@@ -2,13 +2,20 @@
   Water indicator – single environmental measurement with explanation
 #}
 
-{% macro waterIndicator(label, value, unit, status, explanation, trend) %}
+{% from "components/data-provenance.html" import provenanceTag %}
+
+{% macro waterIndicator(label, value, unit, status, explanation, trend, dataType) %}
 <div class="wis-indicator">
   <div class="wis-indicator__header">
     <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{ label }}</h3>
-    {% if status %}
-    <span class="wis-indicator__status wis-indicator__status--{{ status }}">{{ status }}</span>
-    {% endif %}
+    <div class="wis-indicator__meta">
+      {% if dataType %}
+      {{ provenanceTag(dataType) }}
+      {% endif %}
+      {% if status %}
+      <span class="wis-indicator__status wis-indicator__status--{{ status }}">{{ status }}</span>
+      {% endif %}
+    </div>
   </div>
   <p class="wis-indicator__value">
     {{ value }}{% if unit %} <span class="wis-indicator__unit">{{ unit }}</span>{% endif %}

@@ -34,6 +34,10 @@ window.GOVUKPrototypeKit.documentReady(() => {
   })
 
   function buildPanelHtml (location) {
+    const provenanceLabel = location.isLiveData
+      ? '<strong class="govuk-tag govuk-tag--blue wis-provenance-tag">Live data</strong>'
+      : '<strong class="govuk-tag govuk-tag--grey wis-provenance-tag">Demonstration data</strong>'
+
     const warningsHtml = location.warnings.length
       ? `<ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-2">${location.warnings.map(w => `<li>${w}</li>`).join('')}</ul>`
       : '<p class="govuk-body-s">No active warnings</p>'
@@ -41,6 +45,7 @@ window.GOVUKPrototypeKit.documentReady(() => {
     return `
       <h2 class="govuk-heading-s govuk-!-margin-bottom-1">${location.name}</h2>
       <p class="govuk-body-s govuk-!-margin-bottom-2">${location.waterbodyTypeLabel}</p>
+      <p class="govuk-!-margin-bottom-2">${provenanceLabel}</p>
       <p class="govuk-body"><strong>Status: ${location.statusLabel}</strong></p>
       <p class="govuk-body-s">${location.summary}</p>
       ${warningsHtml}

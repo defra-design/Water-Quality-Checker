@@ -5,6 +5,7 @@
 {% from "components/warning-panel.html" import warningPanel, insetPanel %}
 {% from "components/water-indicator.html" import waterIndicator %}
 {% from "components/service-nav.html" import serviceNavigation %}
+{% from "components/data-provenance.html" import provenanceBannerLive, provenanceBannerDemo, provenanceLegend %}
 
 {% set pageName="Local overview" %}
 
@@ -16,6 +17,14 @@
 
     <span class="govuk-caption-l">{{ overview.area }}</span>
     <h1 class="govuk-heading-l">Water conditions near {{ overview.postcode }}</h1>
+
+    {{ provenanceLegend() }}
+
+    {% if overview.isLiveData %}
+    {{ provenanceBannerLive(overview.isMetOfficeConnected) }}
+    {% else %}
+    {{ provenanceBannerDemo() }}
+    {% endif %}
 
     {% if overview.isDefaultArea %}
     <div class="govuk-inset-text">
@@ -55,14 +64,38 @@
       <p class="govuk-body">These factors are combined to help answer: <strong>would I feel confident using the water here today?</strong></p>
 
       <div class="wis-indicator-grid">
+        {% if overview.avgRainfall != null %}
         {% set rainfallStatus = "elevated" if overview.avgRainfall > 10 else "normal" %}
         {{ waterIndicator(
           "Rainfall (last 24 hours)",
           overview.avgRainfall | round(1),
           "mm",
           rainfallStatus,
-          "Heavy rain washes pollutants from land into rivers and can trigger storm overflows at sewage works. Water quality often improves 48 hours after rainfall stops."
+          "Heavy rain washes pollutants from land into rivers and can trigger storm overflows at sewage works. Water quality often improves 48 hours after rainfall stops.",
+          null,
+          overview.factorProvenance.rainfall
         ) }}
+        {% elif overview.isMetOfficeConnected %}
+        {{ waterIndicator(
+          "Rainfall (last 24 hours)",
+          "—",
+          null,
+          null,
+          "Your Met Office key is connected. Subscribe to Site-Specific Global Spot on Weather DataHub for rainfall totals.",
+          null,
+          "pending"
+        ) }}
+        {% else %}
+        {{ waterIndicator(
+          "Rainfall (last 24 hours)",
+          "—",
+          null,
+          null,
+          "Add MET_OFFICE_GLOBAL_SPOT_API_KEY to .env or Heroku config to enable Met Office rainfall data.",
+          null,
+          "pending"
+        ) }}
+        {% endif %}
 
         {% set sewageUnit = "of " ~ overview.nearbyLocations.length %}
         {% set sewageStatus = "elevated" if overview.sewageDischarges.length > 0 else "good" %}
@@ -71,7 +104,9 @@
           overview.sewageDischarges.length,
           sewageUnit,
           sewageStatus,
-          "Storm overflow discharges are reported by water companies. They are more likely during and after heavy rainfall."
+          "Storm overflow discharges are reported by water companies. They are more likely during and after heavy rainfall.",
+          null,
+          overview.factorProvenance.sewage
         ) }}
 
         {% set pollutionStatus = "elevated" if overview.pollutionIncidents.length > 0 else "good" %}
@@ -80,7 +115,9 @@
           overview.pollutionIncidents.length,
           "active reports",
           pollutionStatus,
-          "Pollution incidents are reported to the Environment Agency. An active investigation means you should avoid the affected water."
+          "Pollution incidents are reported to the Environment Agency. An active investigation means you should avoid the affected water.",
+          null,
+          overview.factorProvenance.pollution
         ) }}
 
         {% set algaeStatus = "elevated" if overview.algaeAlerts.length > 0 else "good" %}
@@ -89,7 +126,9 @@
           overview.algaeAlerts.length,
           "locations",
           algaeStatus,
-          "Blue-green algae can produce toxins harmful to people and animals, especially dogs."
+          "Blue-green algae can produce toxins harmful to people and animals, especially dogs.",
+          null,
+          overview.factorProvenance.algae
         ) }}
       </div>
     </section>
@@ -145,7 +184,11 @@
         <span class="govuk-details__summary-text">About this data</span>
       </summary>
       <div class="govuk-details__text">
-        <p class="govuk-body">This prototype uses mock data structured for future API integration with the Environment Agency, Met Office, Thames Water and other sources. Data was last refreshed for demonstration purposes.</p>
+        {% if overview.isLiveData %}
+        <p class="govuk-body">Bathing water data is loaded live from the Environment Agency Bathing Water API. Rainfall uses the Met Office Weather DataHub when configured. Sewage, river level, algae and other indicators are not yet connected and are labelled accordingly.</p>
+        {% else %}
+        <p class="govuk-body">This view uses demonstration data structured for user research. Values are illustrative, not official readings. Try a Yorkshire postcode (for example YO11 1AA) to see live bathing water data.</p>
+        {% endif %}
       </div>
     </details>
 

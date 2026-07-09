@@ -3,14 +3,22 @@
 #}
 
 {% from "components/status-card.html" import statusCard %}
+{% from "components/data-provenance.html" import provenanceTag %}
 
 {% macro locationSummary(location) %}
 <div class="wis-location-summary wis-location-summary--{{ location.overallStatus }}">
   <div class="wis-location-summary__header">
     <span class="wis-location-summary__type">{{ location.waterbodyTypeLabel }}</span>
     <span class="wis-location-summary__status">
-      <span class="wis-status-indicator wis-status-indicator--{{ location.overallStatus }}" aria-hidden="true"></span>
-      {{ location.statusLabel }}
+      {% if location.isLiveData %}
+      {{ provenanceTag('live') }}
+      {% else %}
+      {{ provenanceTag('demo') }}
+      {% endif %}
+      <span class="wis-location-summary__status-label">
+        <span class="wis-status-indicator wis-status-indicator--{{ location.overallStatus }}" aria-hidden="true"></span>
+        {{ location.statusLabel }}
+      </span>
     </span>
   </div>
   <h3 class="govuk-heading-s govuk-!-margin-bottom-1">

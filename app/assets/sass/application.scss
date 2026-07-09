@@ -80,6 +80,16 @@ $wis-border: #b1b4b6;
   &__status {
     font-size: 14px;
     font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+  }
+
+  &__status-label {
+    display: inline-flex;
+    align-items: center;
   }
 
   &__tags {
@@ -108,8 +118,17 @@ $wis-border: #b1b4b6;
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
   }
 
   &__value {
@@ -269,4 +288,40 @@ $wis-border: #b1b4b6;
 .wis-warning-panel--health,
 .wis-warning-panel--issues {
   margin-bottom: 15px;
+}
+
+// Data provenance labels
+.wis-provenance-tag {
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.wis-provenance-legend {
+  background: #f3f2f1;
+  border: 1px solid $wis-border;
+  padding: 12px 15px;
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-bottom: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.wis-provenance-banner--live {
+  border-left: 4px solid #1d70b8;
+}
+
+.wis-provenance-banner--demo {
+  border-left: 4px solid #505a5f;
 }

@@ -7,6 +7,8 @@ const govukPrototypeKit = require('govuk-prototype-kit')
 const router = govukPrototypeKit.requests.setupRouter()
 
 const waterService = require('./services/water-service')
+const dataProvenance = require('./config/data-provenance')
+const metOfficeClient = require('./services/clients/met-office-client')
 
 const chemistryLabels = {
   eColi: 'E. coli',
@@ -24,6 +26,7 @@ const chemistryLabels = {
 function enrichLocation (location, postcode) {
   return {
     ...location,
+    isLiveData: Boolean(location.isLiveData),
     postcodeParam: encodeURIComponent(postcode || location.postcode),
     statusLabel: waterService.getStatusLabel(location.overallStatus),
     waterbodyTypeLabel: waterService.getWaterbodyTypeLabel(location.waterbodyType)
@@ -57,6 +60,15 @@ function buildTimelineEvents (location) {
       description: location.algaeWarning.description,
       type: 'algae',
       status: location.algaeWarning.type
+    })
+  }
+
+  if (location.isLiveData && location.waterChemistry?.eColi?.value != null) {
+    events.unshift({
+      date: waterService.formatDate(location.lastUpdated),
+      description: `Latest EA sample: E. coli ${location.waterChemistry.eColi.value} cfu/100ml`,
+      type: 'normal',
+      status: location.bathingWaterWarning?.classification || null
     })
   }
 
@@ -115,7 +127,9 @@ function buildMapConfig (locations, postcode, areaName) {
         location.algaeWarning.active ? 'Algae alert' : null,
         location.healthWarning.active ? 'Health warning' : null,
         location.pollutionIncidents.length > 0 ? 'Pollution incident' : null
-      ].filter(Boolean)
+      ].filter(Boolean),
+      isLiveData: Boolean(location.isLiveData),
+      dataProvenance: dataProvenance.getLocationProvenance(location)
     }))
   }
 }
@@ -127,7 +141,7 @@ function buildMapTableRows (locations, postcode) {
     { html: `<span class="wis-status-indicator wis-status-indicator--${location.overallStatus}" aria-hidden="true"></span> ${location.statusLabel}` },
     { text: location.recentSewageDischarge.occurred ? 'Yes' : 'No' },
     { text: location.algaeWarning.active ? 'Yes' : 'No' },
-    { text: `${location.waterTemperature.value}°C` }
+    { text: location.waterTemperature.value != null ? `${location.waterTemperature.value}°C` : 'n/a' }
   ])
 }
 
@@ -150,11 +164,11 @@ router.post('/search', (req, res) => {
   }
 
   if (!waterService.isValidPostcode(postcode)) {
-    errors.push({ text: 'Enter a valid UK postcode, for example RG1 1AA', href: '#postcode' })
+    errors.push({ text: 'Enter a valid UK postcode, for example YO11 1AA', href: '#postcode' })
     return res.render('search', {
       postcode,
       errors,
-      errorMessage: { text: 'Enter a valid UK postcode, for example RG1 1AA' }
+      errorMessage: { text: 'Enter a valid UK postcode, for example YO11 1AA' }
     })
   }
 
@@ -162,71 +176,98 @@ router.post('/search', (req, res) => {
 })
 
 // Local overview
-router.get('/overview', (req, res) => {
-  const postcode = req.query.postcode
-  if (!postcode) {
-    return res.redirect('/search')
+router.get('/overview', async (req, res, next) => {
+  try {
+    const postcode = req.query.postcode
+    if (!postcode) {
+      return res.redirect('/search')
+    }
+
+    const overview = await waterService.getOverviewForPostcode(postcode)
+    overview.nearbyLocations = overview.nearbyLocations.map(loc => enrichLocation(loc, overview.postcode))
+    overview.rivers = overview.rivers.map(loc => enrichLocation(loc, overview.postcode))
+    overview.lakes = overview.lakes.map(loc => enrichLocation(loc, overview.postcode))
+    overview.reservoirs = overview.reservoirs.map(loc => enrichLocation(loc, overview.postcode))
+    overview.bathingWaters = overview.bathingWaters.map(loc => enrichLocation(loc, overview.postcode))
+    overview.isMockData = dataProvenance.isOverviewDemo(overview)
+    overview.factorProvenance = {
+      rainfall: dataProvenance.getOverviewFactorProvenance(overview, 'rainfall'),
+      sewage: dataProvenance.getOverviewFactorProvenance(overview, 'sewage'),
+      pollution: dataProvenance.getOverviewFactorProvenance(overview, 'pollution'),
+      algae: dataProvenance.getOverviewFactorProvenance(overview, 'algae')
+    }
+
+    res.render('overview', { overview })
+  } catch (err) {
+    next(err)
   }
-
-  const overview = waterService.getOverviewForPostcode(postcode)
-  overview.nearbyLocations = overview.nearbyLocations.map(loc => enrichLocation(loc, overview.postcode))
-  overview.rivers = overview.rivers.map(loc => enrichLocation(loc, overview.postcode))
-  overview.lakes = overview.lakes.map(loc => enrichLocation(loc, overview.postcode))
-  overview.reservoirs = overview.reservoirs.map(loc => enrichLocation(loc, overview.postcode))
-  overview.bathingWaters = overview.bathingWaters.map(loc => enrichLocation(loc, overview.postcode))
-
-  res.render('overview', { overview })
 })
 
 // Map and list
-router.get('/map', (req, res) => {
-  const postcode = req.query.postcode
-  if (!postcode) {
-    return res.redirect('/search')
+router.get('/map', async (req, res, next) => {
+  try {
+    const postcode = req.query.postcode
+    if (!postcode) {
+      return res.redirect('/search')
+    }
+
+    const normalised = waterService.normalisePostcode(postcode)
+    const locations = (await waterService.getLocationsByPostcode(normalised)).map(loc => enrichLocation(loc, normalised))
+    const area = waterService.getAreaForPostcode(normalised)
+    const isLiveData = locations.some(loc => loc.isLiveData)
+
+    res.render('map', {
+      postcode: normalised,
+      locations,
+      isLiveData,
+      isMockData: !isLiveData,
+      isMetOfficeConnected: metOfficeClient.isConfigured(),
+      tableRows: buildMapTableRows(locations, normalised),
+      mapConfig: buildMapConfig(locations, normalised, area.area)
+    })
+  } catch (err) {
+    next(err)
   }
-
-  const normalised = waterService.normalisePostcode(postcode)
-  const locations = waterService.getLocationsByPostcode(normalised).map(loc => enrichLocation(loc, normalised))
-  const area = waterService.getAreaForPostcode(normalised)
-
-  res.render('map', {
-    postcode: normalised,
-    locations,
-    tableRows: buildMapTableRows(locations, normalised),
-    mapConfig: buildMapConfig(locations, normalised, area.area)
-  })
 })
 
 // Location detail
-router.get('/location/:id', (req, res) => {
-  const location = waterService.getLocationById(req.params.id)
-  if (!location) {
-    return res.status(404).render('404')
+router.get('/location/:id', async (req, res, next) => {
+  try {
+    const location = await waterService.getLocationById(req.params.id)
+    if (!location) {
+      return res.status(404).render('404')
+    }
+
+    const postcode = req.query.postcode ? waterService.normalisePostcode(req.query.postcode) : location.postcode
+    const enriched = enrichLocation(location, postcode)
+    const nearbyLocations = (await Promise.all(
+      location.nearbyLocationIds.map(id => waterService.getLocationById(id))
+    )).filter(Boolean).map(loc => enrichLocation(loc, postcode))
+
+    const chemistryRows = Object.entries(location.waterChemistry).map(([key, reading]) => ({
+      label: chemistryLabels[key] || key,
+      value: reading.value,
+      unit: reading.unit,
+      status: reading.status,
+      dataType: dataProvenance.getChemistryProvenance(location, key)
+    }))
+
+    res.render('location', {
+      location: enriched,
+      postcode,
+      nearbyLocations,
+      timelineEvents: buildTimelineEvents(location),
+      chemistryRows,
+      rainfallProvenance: dataProvenance.getRainfallProvenance(location)
+    })
+  } catch (err) {
+    next(err)
   }
-
-  const postcode = req.query.postcode ? waterService.normalisePostcode(req.query.postcode) : location.postcode
-  const enriched = enrichLocation(location, postcode)
-  const nearbyLocations = waterService.getLocationsByIds(location.nearbyLocationIds)
-    .map(loc => enrichLocation(loc, postcode))
-
-  const chemistryRows = Object.entries(location.waterChemistry).map(([key, reading]) => ({
-    label: chemistryLabels[key] || key,
-    value: reading.value,
-    unit: reading.unit,
-    status: reading.status
-  }))
-
-  res.render('location', {
-    location: enriched,
-    postcode,
-    nearbyLocations,
-    timelineEvents: buildTimelineEvents(location),
-    chemistryRows
-  })
 })
 
 // Ask a question
-router.get('/ask', (req, res) => {
+router.get('/ask', async (req, res, next) => {
+  try {
   const postcode = req.query.postcode || ''
   const questionId = req.query.question
   const userQuery = req.query.q || ''
@@ -254,7 +295,7 @@ router.get('/ask', (req, res) => {
     }
   }
 
-  const location = locationId ? enrichLocation(waterService.getLocationById(locationId), postcode) : null
+  const location = locationId ? enrichLocation(await waterService.getLocationById(locationId), postcode) : null
 
   res.render('ask', {
     postcode,
@@ -264,6 +305,9 @@ router.get('/ask', (req, res) => {
     userQuery,
     allQuestions: waterService.getAllQuestions()
   })
+  } catch (err) {
+    next(err)
+  }
 })
 
 // Understanding water quality

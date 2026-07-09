@@ -4,6 +4,7 @@
 {% from "components/map-legend.html" import mapLegend %}
 {% from "components/location-summary.html" import locationSummary %}
 {% from "components/service-nav.html" import serviceNavigation %}
+{% from "components/data-provenance.html" import provenanceBannerLive, provenanceBannerDemo, provenanceLegend %}
 
 {% set pageName="Map and list" %}
 
@@ -24,6 +25,14 @@
 
     <h1 class="govuk-heading-l">Water locations near {{ postcode }}</h1>
     <p class="govuk-body">Explore nearby water locations on the map, or use the list or table below — all show the same information.</p>
+
+    {{ provenanceLegend() }}
+
+    {% if isLiveData %}
+    {{ provenanceBannerLive(isMetOfficeConnected) }}
+    {% else %}
+    {{ provenanceBannerDemo() }}
+    {% endif %}
 
     {{ mapLegend() }}
 
