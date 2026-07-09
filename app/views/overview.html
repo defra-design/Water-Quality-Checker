@@ -21,7 +21,7 @@
     {{ provenanceLegend() }}
 
     {% if overview.isLiveData %}
-    {{ provenanceBannerLive(overview.isMetOfficeConnected) }}
+    {{ provenanceBannerLive(overview.isMetOfficeConnected, false, overview.isSewageLiveData) }}
     {% else %}
     {{ provenanceBannerDemo() }}
     {% endif %}

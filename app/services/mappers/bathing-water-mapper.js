@@ -211,7 +211,7 @@ function mapBathingWaterToLocation ({ bathingWater, sample }) {
       { name: 'Swimfo bathing water profiles', url: swimfoUrl }
     ],
     lastUpdated: sampleDateTime || new Date().toISOString(),
-    futureApiSource: 'EA Bathing Water API (live), Met Office Weather DataHub, Flood Monitoring (pending)',
+    futureApiSource: 'EA Bathing Water API (live), EA Flood Monitoring (live), Water UK Storm Overflow Hub (live), Met Office Weather DataHub',
     nearbyLocationIds: [],
     isLiveData: true,
     dataSource: 'ea-bathing-water-api'

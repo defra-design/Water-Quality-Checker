@@ -226,11 +226,13 @@ router.get('/map', async (req, res, next) => {
     const locations = (await waterService.getLocationsByPostcode(normalised)).map(loc => enrichLocation(loc, normalised))
     const area = await waterService.getAreaForPostcode(normalised)
     const isLiveData = locations.some(loc => loc.isLiveData)
+    const isSewageLiveData = locations.some(loc => loc.recentSewageDischarge?.isLiveData)
 
     res.render('map', {
       postcode: normalised,
       locations,
       isLiveData,
+      isSewageLiveData,
       isMockData: !isLiveData,
       isMetOfficeConnected: metOfficeClient.isConfigured(),
       isOsMapsConnected: osMapsClient.isConfigured(),

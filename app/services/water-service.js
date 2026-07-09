@@ -12,6 +12,7 @@ const bathingWaterClient = require('./clients/bathing-water-client')
 const postcodeClient = require('./clients/postcode-client')
 const metOfficeClient = require('./clients/met-office-client')
 const hydrologyClient = require('./clients/hydrology-client')
+const stormOverflowClient = require('./clients/storm-overflow-client')
 const { mapBathingWaterToLocation } = require('./mappers/bathing-water-mapper')
 
 const POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i
@@ -175,6 +176,7 @@ async function getLocationsByPostcode (postcode) {
   bathingLocations = sortByDistance(bathingLocations, area.centre)
   bathingLocations = assignNearbyIds(bathingLocations)
   bathingLocations = await metOfficeClient.enrichLocationsWithRainfall(bathingLocations)
+  bathingLocations = await stormOverflowClient.enrichLocationsWithStormOverflows(bathingLocations)
   // River level/flow is only shown on the single location detail page, so it's
   // fetched lazily in getLocationById rather than for every nearby location here.
   bathingLocations = bathingLocations.map(loc => ({
@@ -192,6 +194,7 @@ async function getLocationById (id) {
     const record = await bathingWaterClient.getBathingWater(eubwid)
     let location = mapBathingWaterToLocation(record)
     let enriched = await metOfficeClient.enrichLocationsWithRainfall([location])
+    enriched = await stormOverflowClient.enrichLocationsWithStormOverflows(enriched)
     enriched = await hydrologyClient.enrichLocationsWithRiverConditions(enriched)
     return enriched[0]
   }
@@ -235,6 +238,7 @@ async function getOverviewForPostcode (postcode) {
     : null
 
   const isLiveData = nearbyLocations.some(l => l.isLiveData)
+  const isSewageLiveData = nearbyLocations.some(l => l.recentSewageDischarge?.isLiveData)
 
   return {
     postcode: normalisePostcode(postcode),
@@ -245,6 +249,7 @@ async function getOverviewForPostcode (postcode) {
     isDefaultArea: area.isDefault || false,
     isApproximateArea: area.isApproximate || false,
     isLiveData,
+    isSewageLiveData,
     isMetOfficeConnected: metOfficeClient.isConfigured(),
     overallConfidence,
     statusCounts,

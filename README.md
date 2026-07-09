@@ -79,7 +79,7 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 | Bathing water classification | **Live** (nationwide) | `app/services/mappers/bathing-water-mapper.js` |
 | Map basemap | **Live** (when OS key set) | `app/services/clients/os-maps-client.js` |
 | River level / flow | **Live** (location detail page only) | `app/services/clients/hydrology-client.js` |
-| Sewage discharges | Not connected | Mock data on Berkshire demo only |
+| Sewage discharges | **Live** (8 of 9 water companies; not Southern Water) | `app/services/clients/storm-overflow-client.js` |
 | Water temperature | Not connected | — |
 | Agricultural runoff / chemistry | Not connected (except bacteria on live sites) | — |
 | Industrial pollution | Not connected | Mock on Berkshire demo only |
@@ -94,7 +94,7 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 Aligned with the “would I feel confident today?” journey for bathing waters:
 
 1. ~~**EA Hydrology + Flood Monitoring** — river level, flow at nearest stations~~ — done (location detail page); water temperature still not connected
-2. **Storm Overflow Hub / EDM** — recent sewage discharges on overview and location pages
+2. ~~**Storm Overflow Hub / EDM** — recent sewage discharges on overview and location pages~~ — done; covers 8 of 9 water companies (see below)
 3. **EA Water Quality** — nitrates, phosphates, turbidity, dissolved oxygen (chemistry table)
 4. **Pollution incidents** — industrial and environmental incident reports (curated where no clean API)
 5. **Algae / ecology** — seasonal and indicator-based signals
@@ -117,10 +117,19 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 - Walks outward through nearby stations if the nearest one has a decommissioned/dataless measure
 - This is a "Beta service" per EA's own API metadata and can be slow (a few seconds); results are cached for 15 minutes and bounded by a request timeout so a slow response never blocks the page — river level/flow simply won't show if it times out
 
+**Water UK National Storm Overflow Hub (NSOH)** — near-real-time storm overflow discharge status, on both the overview and location detail pages:
+
+- There's no single national feed — each water company publishes its own Esri ArcGIS feature service. This queries all of them in parallel: Anglian, Northumbrian, United Utilities, Severn Trent, South West Water, Wessex, Yorkshire and Thames Water (8 of England's 9 water companies)
+- **Southern Water** is not included — it moved off this ArcGIS pattern in 2026 and would need separate handling
+- One combined bounding-box query covers every location shown on a page (rather than one query per location), then the nearest outfall to each location is matched in memory — keeps it to ~8 requests per page load rather than dozens
+- Each outfall reports `Start` (currently discharging), `Stop`, or `Offline` (monitor not reporting); a discharge also counts as "recent" if it stopped within the last 48 hours
+- Only outfalls within 5km of a location are matched; beyond that it's reported as no nearby monitored outfall rather than guessing
+
 ```
 app/services/clients/postcode-client.js        # UK postcode → lat/lng + grid ref
 app/services/clients/bathing-water-client.js   # EA Bathing Water API client with 15-min cache
 app/services/clients/hydrology-client.js       # EA Flood Monitoring API client with 15-min cache
+app/services/clients/storm-overflow-client.js  # National Storm Overflow Hub client (8 water company feeds) with 10-min cache
 app/services/clients/http-utils.js             # Shared retry-with-backoff and concurrency limiting
 app/services/mappers/bathing-water-mapper.js   # API → location model
 ```

@@ -29,7 +29,7 @@
     {{ provenanceLegend() }}
 
     {% if isLiveData %}
-    {{ provenanceBannerLive(isMetOfficeConnected) }}
+    {{ provenanceBannerLive(isMetOfficeConnected, false, isSewageLiveData) }}
     {% else %}
     {{ provenanceBannerDemo() }}
     {% endif %}

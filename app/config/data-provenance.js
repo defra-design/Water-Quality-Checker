@@ -25,6 +25,9 @@ function getOverviewFactorProvenance (overview, factor) {
   if (factor === 'rainfall') {
     return overview.avgRainfall != null ? 'live' : 'pending'
   }
+  if (factor === 'sewage') {
+    return overview.isSewageLiveData ? 'live' : 'pending'
+  }
   return 'pending'
 }
 
