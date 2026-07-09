@@ -36,6 +36,11 @@ addFilter('chemistryLabel', (key) => {
   return chemistryLabels[key] || key
 })
 
+addFilter('slug', (value) => {
+  if (!value) return ''
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+})
+
 addFilter('nl2p', (text) => {
   if (!text) return ''
   return text.split('\n\n').map(paragraph => {

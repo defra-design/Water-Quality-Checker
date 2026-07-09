@@ -154,8 +154,8 @@ $wis-border: #b1b4b6;
     text-transform: capitalize;
 
     &--good, &--normal { color: $wis-good; }
-    &--elevated, &--moderate, &--caution { color: $wis-caution; }
-    &--poor { color: $wis-poor; }
+    &--elevated, &--moderate, &--caution, &--high, &--above-normal { color: $wis-caution; }
+    &--poor, &--low, &--below-normal { color: $wis-poor; }
   }
 }
 

@@ -13,7 +13,7 @@
       {{ provenanceTag(dataType) }}
       {% endif %}
       {% if status %}
-      <span class="wis-indicator__status wis-indicator__status--{{ status }}">{{ status }}</span>
+      <span class="wis-indicator__status wis-indicator__status--{{ status | slug }}">{{ status }}</span>
       {% endif %}
     </div>
   </div>

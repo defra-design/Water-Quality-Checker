@@ -78,8 +78,8 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 | Bacteria / viruses | **Live** (designated bathing waters) | `app/services/clients/bathing-water-client.js` |
 | Bathing water classification | **Live** (nationwide) | `app/services/mappers/bathing-water-mapper.js` |
 | Map basemap | **Live** (when OS key set) | `app/services/clients/os-maps-client.js` |
+| River level / flow | **Live** (location detail page only) | `app/services/clients/hydrology-client.js` |
 | Sewage discharges | Not connected | Mock data on Berkshire demo only |
-| River level / flow | Not connected | — |
 | Water temperature | Not connected | — |
 | Agricultural runoff / chemistry | Not connected (except bacteria on live sites) | — |
 | Industrial pollution | Not connected | Mock on Berkshire demo only |
@@ -93,7 +93,7 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 
 Aligned with the “would I feel confident today?” journey for bathing waters:
 
-1. **EA Hydrology + Flood Monitoring** — river level, flow, water temperature at nearest stations
+1. ~~**EA Hydrology + Flood Monitoring** — river level, flow at nearest stations~~ — done (location detail page); water temperature still not connected
 2. **Storm Overflow Hub / EDM** — recent sewage discharges on overview and location pages
 3. **EA Water Quality** — nitrates, phosphates, turbidity, dissolved oxygen (chemistry table)
 4. **Pollution incidents** — industrial and environmental incident reports (curated where no clean API)
@@ -111,9 +111,17 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 
 **Postcode geocoding** — [postcodes.io](https://postcodes.io/) (no API key required)
 
+**EA Flood Monitoring API** (`https://environment.data.gov.uk/flood-monitoring/`) — river level and flow at the nearest monitoring station:
+
+- Only fetched for the single location detail page (not the overview list), since that's the only place it's shown
+- Walks outward through nearby stations if the nearest one has a decommissioned/dataless measure
+- This is a "Beta service" per EA's own API metadata and can be slow (a few seconds); results are cached for 15 minutes and bounded by a request timeout so a slow response never blocks the page — river level/flow simply won't show if it times out
+
 ```
 app/services/clients/postcode-client.js        # UK postcode → lat/lng + grid ref
-app/services/clients/bathing-water-client.js   # EA API client with 15-min cache
+app/services/clients/bathing-water-client.js   # EA Bathing Water API client with 15-min cache
+app/services/clients/hydrology-client.js       # EA Flood Monitoring API client with 15-min cache
+app/services/clients/http-utils.js             # Shared retry-with-backoff and concurrency limiting
 app/services/mappers/bathing-water-mapper.js   # API → location model
 ```
 

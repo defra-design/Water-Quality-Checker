@@ -3,7 +3,10 @@
  * https://environment.data.gov.uk/bwq/
  */
 
+const { fetchJsonWithRetry, runWithConcurrency } = require('./http-utils')
+
 const BASE_URL = 'https://environment.data.gov.uk'
+const REQUEST_CONCURRENCY = 4
 
 const cache = new Map()
 const CACHE_TTL_MS = 15 * 60 * 1000
@@ -23,13 +26,7 @@ function setCache (key, data) {
 }
 
 async function fetchJson (url) {
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json' }
-  })
-  if (!response.ok) {
-    throw new Error(`Bathing Water API error ${response.status} for ${url}`)
-  }
-  return response.json()
+  return fetchJsonWithRetry(url, { errorPrefix: 'Bathing Water API' })
 }
 
 function toHttps (uri) {
@@ -94,16 +91,14 @@ async function getSampleAssessment (uri) {
  * Fetch multiple bathing waters in parallel (with concurrency limit).
  */
 async function getBathingWaters (eubwids) {
-  const results = await Promise.all(
-    eubwids.map(async (eubwid) => {
-      try {
-        return await getBathingWater(eubwid)
-      } catch (err) {
-        console.error(`Failed to load bathing water ${eubwid}:`, err.message)
-        return null
-      }
-    })
-  )
+  const results = await runWithConcurrency(eubwids, REQUEST_CONCURRENCY, async (eubwid) => {
+    try {
+      return await getBathingWater(eubwid)
+    } catch (err) {
+      console.error(`Failed to load bathing water ${eubwid}:`, err.message)
+      return null
+    }
+  })
   return results.filter(Boolean)
 }
 

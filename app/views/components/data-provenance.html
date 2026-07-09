@@ -27,11 +27,11 @@
 </div>
 {% endmacro %}
 
-{% macro provenanceBannerLive(isMetOfficeConnected) %}
+{% macro provenanceBannerLive(isMetOfficeConnected, mentionRiverData) %}
 <div class="govuk-inset-text wis-provenance-banner wis-provenance-banner--live">
   <p class="govuk-body govuk-!-margin-bottom-0">
     <strong>Live data in this view:</strong>
-    bathing water from the Environment Agency{% if isMetOfficeConnected %}; rainfall from the Met Office when shown{% endif %}.
+    bathing water from the Environment Agency{% if isMetOfficeConnected %}; rainfall from the Met Office when shown{% endif %}{% if mentionRiverData %}; river level/flow from EA Flood Monitoring when shown{% endif %}.
     Other indicators may still be demonstration data or not yet connected — see labels on each section.
   </p>
 </div>

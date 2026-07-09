@@ -11,6 +11,7 @@ const questions = require('../data/questions.json')
 const bathingWaterClient = require('./clients/bathing-water-client')
 const postcodeClient = require('./clients/postcode-client')
 const metOfficeClient = require('./clients/met-office-client')
+const hydrologyClient = require('./clients/hydrology-client')
 const { mapBathingWaterToLocation } = require('./mappers/bathing-water-mapper')
 
 const POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i
@@ -174,6 +175,8 @@ async function getLocationsByPostcode (postcode) {
   bathingLocations = sortByDistance(bathingLocations, area.centre)
   bathingLocations = assignNearbyIds(bathingLocations)
   bathingLocations = await metOfficeClient.enrichLocationsWithRainfall(bathingLocations)
+  // River level/flow is only shown on the single location detail page, so it's
+  // fetched lazily in getLocationById rather than for every nearby location here.
   bathingLocations = bathingLocations.map(loc => ({
     ...loc,
     postcode: normalised
@@ -188,7 +191,8 @@ async function getLocationById (id) {
     const eubwid = id.replace('bathing-water-', '')
     const record = await bathingWaterClient.getBathingWater(eubwid)
     let location = mapBathingWaterToLocation(record)
-    const enriched = await metOfficeClient.enrichLocationsWithRainfall([location])
+    let enriched = await metOfficeClient.enrichLocationsWithRainfall([location])
+    enriched = await hydrologyClient.enrichLocationsWithRiverConditions(enriched)
     return enriched[0]
   }
   return locations.find(loc => loc.id === id) || null

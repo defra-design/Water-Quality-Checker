@@ -22,7 +22,7 @@
     {{ provenanceLegend() }}
 
     {% if location.isLiveData %}
-    {{ provenanceBannerLive(location.recentRainfall.isLiveData) }}
+    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true) }}
     <p class="govuk-body">
       {{ provenanceTag('live') }}
       {% if location.recentRainfall.isLiveData %}
@@ -125,8 +125,8 @@
         {% endif %}
 
         {% if location.riverLevel %}
-        {% set riverProvenance = "pending" if location.isLiveData else "demo" %}
-        {% set riverLevelExplanation = "Normal range: " ~ location.riverLevel.normalRange ~ ". " ~ (location.riverLevel.status | capitalize) ~ " levels can affect safety near the bank." %}
+        {% set riverProvenance = "live" if location.riverLevel.isLiveData else ("pending" if location.isLiveData else "demo") %}
+        {% set riverLevelExplanation = ("Nearest station: " ~ location.riverLevel.stationName ~ (" on " ~ location.riverLevel.riverName if location.riverLevel.riverName) ~ ", " ~ location.riverLevel.distanceKm ~ "km away. " if location.riverLevel.isLiveData else "") ~ ("Normal range: " ~ location.riverLevel.normalRange ~ ". " if location.riverLevel.normalRange) ~ ((location.riverLevel.status | capitalize) ~ " levels can affect safety near the bank." if location.riverLevel.status else "River levels can affect safety near the bank.") %}
         {{ waterIndicator(
           "River level",
           location.riverLevel.value,
@@ -139,13 +139,14 @@
         {% endif %}
 
         {% if location.flow %}
-        {% set flowProvenance = "pending" if location.isLiveData else "demo" %}
+        {% set flowProvenance = "live" if location.flow.isLiveData else ("pending" if location.isLiveData else "demo") %}
+        {% set flowExplanation = ("Nearest station: " ~ location.flow.stationName ~ (" on " ~ location.flow.riverName if location.flow.riverName) ~ ", " ~ location.flow.distanceKm ~ "km away. " if location.flow.isLiveData else "") ~ "How fast water is moving. High flow after rain is common but can carry more sediment and pollutants." %}
         {{ waterIndicator(
           "River flow",
           location.flow.value,
           location.flow.unit,
           location.flow.status,
-          "How fast water is moving. High flow after rain is common but can carry more sediment and pollutants.",
+          flowExplanation,
           location.flow.trend,
           flowProvenance
         ) }}
