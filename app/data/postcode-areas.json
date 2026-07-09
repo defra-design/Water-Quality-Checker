@@ -1,0 +1,55 @@
+{
+  "RG1": {
+    "area": "Reading, Berkshire",
+    "centre": { "lat": 51.4543, "lng": -0.9731 },
+    "locationIds": [
+      "river-thames-caversham",
+      "river-kennet-reading",
+      "river-loddon-winnersh",
+      "dinton-pastures-lake",
+      "queen-mother-reservoir",
+      "river-thames-wallingford"
+    ]
+  },
+  "RG4": {
+    "area": "Caversham, Berkshire",
+    "centre": { "lat": 51.4672, "lng": -0.9695 },
+    "locationIds": [
+      "river-thames-caversham",
+      "river-kennet-reading",
+      "river-loddon-winnersh",
+      "dinton-pastures-lake",
+      "queen-mother-reservoir",
+      "river-thames-wallingford"
+    ]
+  },
+  "RG10": {
+    "area": "Twyford, Berkshire",
+    "centre": { "lat": 51.4367, "lng": -0.8892 },
+    "locationIds": [
+      "dinton-pastures-lake",
+      "river-loddon-winnersh",
+      "river-kennet-reading",
+      "river-thames-caversham",
+      "queen-mother-reservoir"
+    ]
+  },
+  "OX10": {
+    "area": "Wallingford, Oxfordshire",
+    "centre": { "lat": 51.5998, "lng": -1.1248 },
+    "locationIds": [
+      "river-thames-wallingford",
+      "river-thames-caversham",
+      "river-kennet-reading"
+    ]
+  },
+  "SL3": {
+    "area": "Datchet, Berkshire",
+    "centre": { "lat": 51.4845, "lng": -0.5412 },
+    "locationIds": [
+      "queen-mother-reservoir",
+      "river-thames-caversham",
+      "dinton-pastures-lake"
+    ]
+  }
+}

@@ -1,0 +1,71 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "components/question-response.html" import questionBubble, suggestedQuestions %}
+{% from "components/service-nav.html" import serviceNavigation %}
+
+{% set pageName="Ask a question" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {{ serviceNavigation("ask", postcode) }}
+
+    <h1 class="govuk-heading-l">Ask a question</h1>
+    <p class="govuk-body">Get plain English answers about water quality. This prototype uses predefined responses — a live service could use verified content or AI with human oversight.</p>
+
+    <div class="wis-chat" id="wis-chat" aria-live="polite" aria-label="Conversation">
+      {{ questionBubble("Hello. I can help answer common questions about water quality, swimming safety, sewage discharges and more. Choose a suggested question or type your own.", false) }}
+
+      {% if conversation %}
+        {% for message in conversation %}
+        {{ questionBubble(message.text, message.isUser) }}
+        {% endfor %}
+      {% endif %}
+
+      {% if currentResponse %}
+      {{ questionBubble(currentResponse.response | nl2p, false) }}
+
+      {% if currentResponse.followUp %}
+      <div class="wis-chat__follow-up">
+        <p class="govuk-body-s">Related questions:</p>
+        <ul class="govuk-list">
+          {% for followUpId in currentResponse.followUp %}
+            {% for q in allQuestions %}
+              {% if q.id == followUpId %}
+              <li><a class="govuk-link" href="/ask?question={{ q.id }}{% if postcode %}&postcode={{ postcode }}{% endif %}">{{ q.question }}</a></li>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <form method="get" action="/ask" class="wis-chat__form govuk-!-margin-top-4">
+      {% if postcode %}
+      <input type="hidden" name="postcode" value="{{ postcode }}">
+      {% endif %}
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="user-question">Your question</label>
+        <input class="govuk-input" id="user-question" name="q" type="text" value="{{ userQuery }}" autocomplete="off">
+      </div>
+      {{ govukButton({ text: "Ask" }) }}
+    </form>
+
+    {{ suggestedQuestions(allQuestions) }}
+
+    {% if location %}
+    <div class="govuk-inset-text govuk-!-margin-top-6">
+      <p class="govuk-body">You are asking about <a class="govuk-link" href="/location/{{ location.id }}?postcode={{ postcode }}">{{ location.name }}</a>. Answers are general — always check the location page for today's conditions.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block pageScripts %}
+<script src="/public/javascripts/chat.js"></script>
+{% endblock %}

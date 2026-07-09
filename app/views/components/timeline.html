@@ -1,0 +1,20 @@
+{#
+  Timeline – recent events at a location
+#}
+
+{% macro timeline(events) %}
+<ol class="wis-timeline govuk-list">
+  {% for event in events %}
+  <li class="wis-timeline__item wis-timeline__item--{{ event.type }}">
+    <div class="wis-timeline__marker" aria-hidden="true"></div>
+    <div class="wis-timeline__content">
+      <p class="govuk-body-s govuk-!-margin-bottom-0"><strong>{{ event.date }}</strong></p>
+      <p class="govuk-body govuk-!-margin-bottom-0">{{ event.description }}</p>
+      {% if event.status %}
+      <p class="govuk-body-s govuk-!-margin-bottom-0">Status: {{ event.status }}</p>
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ol>
+{% endmacro %}

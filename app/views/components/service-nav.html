@@ -1,0 +1,15 @@
+{#
+  Shared navigation for the Water Intelligence Service
+#}
+
+{% macro serviceNavigation(currentPage, postcode) %}
+<nav class="govuk-!-margin-bottom-6" aria-label="Service navigation">
+  <ul class="govuk-list wis-service-nav">
+    <li><a class="govuk-link{% if currentPage == 'overview' %} wis-service-nav__current{% endif %}" href="/overview?postcode={{ postcode }}">Local overview</a></li>
+    <li><a class="govuk-link{% if currentPage == 'map' %} wis-service-nav__current{% endif %}" href="/map?postcode={{ postcode }}">Map and list</a></li>
+    <li><a class="govuk-link{% if currentPage == 'ask' %} wis-service-nav__current{% endif %}" href="/ask{% if postcode %}?postcode={{ postcode }}{% endif %}">Ask a question</a></li>
+    <li><a class="govuk-link{% if currentPage == 'understanding' %} wis-service-nav__current{% endif %}" href="/understanding-water-quality">Understanding water quality</a></li>
+    <li><a class="govuk-link" href="/search">Change postcode</a></li>
+  </ul>
+</nav>
+{% endmacro %}

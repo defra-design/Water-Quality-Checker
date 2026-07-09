@@ -1,0 +1,47 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageName="Home" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <span class="govuk-caption-xl">Department for Environment, Food and Rural Affairs</span>
+    <h1 class="govuk-heading-xl">Check water conditions near you</h1>
+
+    <p class="govuk-body-l">Use the Water Intelligence Service to understand whether you can feel confident using rivers, lakes and coastal waters for swimming, paddling, fishing and other activities.</p>
+
+    <p class="govuk-body">This service brings together trusted information from multiple organisations including the Environment Agency, Met Office, water companies, local authorities and citizen science projects.</p>
+
+    <h2 class="govuk-heading-m">What you can find out</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>whether conditions are good, need caution, or should be avoided today</li>
+      <li>recent sewage discharges, pollution incidents and algae warnings</li>
+      <li>rainfall, river levels, flow and water temperature</li>
+      <li>plain English advice for swimming, paddling, fishing and pets</li>
+      <li>the evidence behind the advice if you want to explore further</li>
+    </ul>
+
+    <h2 class="govuk-heading-m">Who this is for</h2>
+    <p class="govuk-body">Anyone who uses or cares about open water — wild swimmers, paddleboarders, canoeists, anglers, dog walkers, parents, teachers, farmers, flood action groups and local communities.</p>
+
+    <div class="govuk-inset-text">
+      <p class="govuk-body">This is an alpha discovery prototype. It does not replace services like <a class="govuk-link" href="https://environment.data.gov.uk/bwq/profiles/" rel="noreferrer">Swimfo</a>. It explores how Defra could provide a single, trusted view of water conditions.</p>
+    </div>
+
+    {{ govukButton({
+      text: "Start now",
+      href: "/search",
+      isStartButton: true
+    }) }}
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Other ways to use this service</h2>
+    <ul class="govuk-list">
+      <li><a class="govuk-link" href="/ask">Ask a question about water quality</a></li>
+      <li><a class="govuk-link" href="/understanding-water-quality">Learn about understanding water quality</a></li>
+    </ul>
+
+  </div>
+</div>
+{% endblock %}

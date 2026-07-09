@@ -1,0 +1,16 @@
+{#
+  Status card component – shows overall confidence with accessible text labels
+  Usage: {% from "components/status-card.html" import statusCard %}
+#}
+
+{% macro statusCard(status, title, description, tagText) %}
+<div class="wis-status-card wis-status-card--{{ status }}" role="status">
+  <div class="wis-status-card__header">
+    <span class="wis-status-card__tag" aria-hidden="true">{{ tagText or status }}</span>
+    <h2 class="govuk-heading-m wis-status-card__title">{{ title }}</h2>
+  </div>
+  {% if description %}
+  <p class="govuk-body">{{ description }}</p>
+  {% endif %}
+</div>
+{% endmacro %}

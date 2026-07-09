@@ -1,0 +1,61 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% set pageName="Find water near you" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <h1 class="govuk-heading-l">Find water near you</h1>
+
+    <p class="govuk-body">Enter a postcode to see rivers, lakes, reservoirs and bathing waters in your area.</p>
+
+    {% if errors %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: errors
+    }) }}
+    {% endif %}
+
+    <form method="post" action="/search" novalidate>
+      {{ govukInput({
+        label: {
+          text: "Postcode",
+          classes: "govuk-label--l",
+          isPageHeading: false
+        },
+        hint: {
+          text: "For example, RG1 1AA"
+        },
+        id: "postcode",
+        name: "postcode",
+        value: postcode,
+        classes: "govuk-input--width-10",
+        autocomplete: "postal-code",
+        errorMessage: errorMessage
+      }) }}
+
+      {{ govukButton({
+        text: "Find water locations"
+      }) }}
+    </form>
+
+    <details class="govuk-details govuk-!-margin-top-6">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Try example postcodes</span>
+      </summary>
+      <div class="govuk-details__text">
+        <ul class="govuk-list">
+          <li><a class="govuk-link" href="/overview?postcode=RG1%201AA">RG1 1AA – Reading</a></li>
+          <li><a class="govuk-link" href="/overview?postcode=RG4%208BY">RG4 8BY – Caversham</a></li>
+          <li><a class="govuk-link" href="/overview?postcode=OX10%200EB">OX10 0EB – Wallingford</a></li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+</div>
+{% endblock %}

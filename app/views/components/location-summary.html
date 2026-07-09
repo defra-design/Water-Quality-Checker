@@ -1,0 +1,36 @@
+{#
+  Location summary card – used in lists, map sidebar and overview
+#}
+
+{% from "components/status-card.html" import statusCard %}
+
+{% macro locationSummary(location) %}
+<div class="wis-location-summary wis-location-summary--{{ location.overallStatus }}">
+  <div class="wis-location-summary__header">
+    <span class="wis-location-summary__type">{{ location.waterbodyTypeLabel }}</span>
+    <span class="wis-location-summary__status">
+      <span class="wis-status-indicator wis-status-indicator--{{ location.overallStatus }}" aria-hidden="true"></span>
+      {{ location.statusLabel }}
+    </span>
+  </div>
+  <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
+    <a class="govuk-link" href="/location/{{ location.id }}?postcode={{ location.postcodeParam }}">{{ location.name }}</a>
+  </h3>
+  <p class="govuk-body-s govuk-!-margin-bottom-2">{{ location.location }}</p>
+  <p class="govuk-body-s">{{ location.confidenceSummary | truncate(120) }}</p>
+  <ul class="govuk-list wis-location-summary__tags">
+    {% if location.recentSewageDischarge.occurred %}
+    <li><strong class="govuk-tag govuk-tag--red">Sewage discharge</strong></li>
+    {% endif %}
+    {% if location.algaeWarning.active %}
+    <li><strong class="govuk-tag govuk-tag--yellow">Algae alert</strong></li>
+    {% endif %}
+    {% if location.healthWarning.active %}
+    <li><strong class="govuk-tag govuk-tag--orange">Health warning</strong></li>
+    {% endif %}
+    {% if location.pollutionIncidents.length > 0 %}
+    <li><strong class="govuk-tag govuk-tag--red">Pollution incident</strong></li>
+    {% endif %}
+  </ul>
+</div>
+{% endmacro %}

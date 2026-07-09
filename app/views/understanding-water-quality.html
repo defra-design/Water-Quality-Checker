@@ -1,0 +1,183 @@
+{% extends "layouts/main.html" %}
+{% from "components/service-nav.html" import serviceNavigation %}
+
+{% set pageName="Understanding water quality" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {{ serviceNavigation("understanding", postcode) }}
+
+    <h1 class="govuk-heading-l">Understanding water quality</h1>
+    <p class="govuk-body-l">Plain English explanations of the factors that affect whether you can feel confident using open water.</p>
+
+    <nav class="govuk-!-margin-bottom-6" aria-label="On this page">
+      <ol class="govuk-list">
+        <li><a class="govuk-link" href="#themes">Six themes</a></li>
+        <li><a class="govuk-link" href="#indicators">Water quality indicators</a></li>
+        <li><a class="govuk-link" href="#emerging">Emerging indicators</a></li>
+      </ol>
+    </nav>
+
+    <h2 class="govuk-heading-m" id="themes">Six themes</h2>
+    <p class="govuk-body">Water Intelligence brings information together across these themes. Each affects the answer to: would I feel confident using the water here today?</p>
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Weather</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">Weather affects water conditions quickly and noticeably.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><strong>Rainfall</strong> – washes pollutants from roads, fields and urban areas into rivers. Heavy rain can also trigger storm overflows.</li>
+          <li><strong>Temperature</strong> – warmer water encourages algae growth and affects comfort for swimmers.</li>
+          <li><strong>Storms</strong> – combine heavy rain, high flow and overflow risk.</li>
+          <li><strong>Drought</strong> – low flow can concentrate pollutants and reduce oxygen levels.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Hydrology</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">Hydrology is the movement and levels of water in rivers, lakes and underground.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><strong>River level</strong> – how high the water is. Unusually high levels can be dangerous near the bank.</li>
+          <li><strong>River flow</strong> – how fast water is moving. High flow after rain is normal.</li>
+          <li><strong>Groundwater</strong> – water beneath the surface that feeds rivers during dry periods.</li>
+          <li><strong>Reservoir levels</strong> – important for water supply and some recreational access.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Pollution</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">Pollution enters water from many sources. Not all pollution is visible.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><strong>Storm overflows</strong> – relief valves at sewage works that operate during heavy rain.</li>
+          <li><strong>Industrial incidents</strong> – spills and discharges from factories and treatment plants.</li>
+          <li><strong>Agricultural pollution</strong> – runoff containing fertilisers, soil and animal waste.</li>
+          <li><strong>Recent pollution reports</strong> – incidents reported by the public or detected by monitoring.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Water chemistry</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">Chemical measurements help scientists assess water health and bathing safety.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><strong>Oxygen</strong> – essential for fish and aquatic life.</li>
+          <li><strong>Nutrients</strong> – nitrates and phosphates from farming can fuel algae growth.</li>
+          <li><strong>pH</strong> – acidity/alkalinity of water.</li>
+          <li><strong>Contaminants</strong> – including bacteria, metals and chemicals.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Ecology</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">Healthy water supports diverse plants and animals.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><strong>Fish</strong> – sensitive to oxygen levels and pollution.</li>
+          <li><strong>Invertebrates</strong> – insects and larvae indicate long-term water health.</li>
+          <li><strong>Habitats</strong> – reed beds, gravels and vegetation support wildlife.</li>
+          <li><strong>Algae</strong> – natural but can bloom to harmful levels.</li>
+          <li><strong>Biodiversity</strong> – the variety of species present.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">Public health</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">What matters most for people using water for recreation.</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><strong>Bathing water</strong> – designated sites with official classifications.</li>
+          <li><strong>Health warnings</strong> – formal advice to avoid contact.</li>
+          <li><strong>Swimming advice</strong> – practical guidance for today.</li>
+          <li><strong>Water safety</strong> – currents, depth and cold water risks.</li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-8" id="indicators">Water quality indicators</h2>
+    <p class="govuk-body">These are commonly measured. We translate them into plain English on location pages.</p>
+
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">E. coli</dt>
+        <dd class="govuk-summary-list__value">Bacteria from gut waste. High levels suggest faecal contamination and a higher risk of illness if you swallow water.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Intestinal enterococci</dt>
+        <dd class="govuk-summary-list__value">Another bacteria used in bathing water standards. Indicates pollution from human or animal sources.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Dissolved oxygen</dt>
+        <dd class="govuk-summary-list__value">Oxygen available for aquatic life. Low levels can harm fish and indicate pollution.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">pH</dt>
+        <dd class="govuk-summary-list__value">Measures acidity. Most rivers are slightly alkaline (pH 7–8). Extreme values can indicate problems.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Turbidity</dt>
+        <dd class="govuk-summary-list__value">Cloudiness caused by particles in water. High turbidity after rain is common but can carry pollutants.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Water temperature</dt>
+        <dd class="govuk-summary-list__value">Affects comfort, algae risk and oxygen levels. Warm stagnant water needs more caution.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Nitrate</dt>
+        <dd class="govuk-summary-list__value">A nutrient from fertilisers. Elevated levels can fuel algae and affect ecology.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Phosphate</dt>
+        <dd class="govuk-summary-list__value">Another nutrient. Often linked to sewage and agricultural runoff.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Ammonia</dt>
+        <dd class="govuk-summary-list__value">Toxic to aquatic life at high levels. Can indicate sewage pollution.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Conductivity</dt>
+        <dd class="govuk-summary-list__value">How well water conducts electricity. Indicates dissolved salts and minerals.</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Chlorophyll</dt>
+        <dd class="govuk-summary-list__value">Indicates algae abundance. High levels may precede visible blooms.</dd>
+      </div>
+    </dl>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-8" id="emerging">Emerging indicators</h2>
+    <p class="govuk-body">Scientists are developing monitoring for newer concerns. A future Water Intelligence Service could include these where data becomes available.</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>PFAS</strong> – "forever chemicals" used in industry and consumer products, persistent in the environment.</li>
+      <li><strong>Microplastics</strong> – tiny plastic particles from breakdown of larger plastics and synthetic fibres.</li>
+      <li><strong>Pharmaceutical residues</strong> – medicines passing through sewage treatment into rivers.</li>
+      <li><strong>Antibiotic resistant bacteria</strong> – bacteria that survive antibiotics, linked to wastewater.</li>
+      <li><strong>Endocrine disrupting chemicals</strong> – chemicals that can interfere with hormones in wildlife and humans.</li>
+      <li><strong>Biodiversity</strong> – broader ecological measures including species counts and habitat quality.</li>
+    </ul>
+
+    <p class="govuk-body govuk-!-margin-top-6"><a class="govuk-link" href="/ask">Ask a question</a> if you want to know how any of these affect recreational use.</p>
+
+  </div>
+</div>
+{% endblock %}

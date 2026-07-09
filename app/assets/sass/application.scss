@@ -1,0 +1,287 @@
+//
+// Water Intelligence Service styles
+//
+
+// Status colours – always paired with text labels (not colour alone)
+$wis-good: #00703c;
+$wis-caution: #f47738;
+$wis-poor: #d4351c;
+$wis-border: #b1b4b6;
+
+// Status indicator dot
+.wis-status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 2px solid #0b0c0c;
+
+  &--good { background-color: $wis-good; }
+  &--caution { background-color: $wis-caution; }
+  &--poor { background-color: $wis-poor; }
+}
+
+// Status card
+.wis-status-card {
+  border: 3px solid $wis-border;
+  padding: 20px;
+  margin-bottom: 20px;
+
+  &--good { border-left-color: $wis-good; border-left-width: 8px; }
+  &--caution { border-left-color: $wis-caution; border-left-width: 8px; }
+  &--poor { border-left-color: $wis-poor; border-left-width: 8px; }
+
+  &__tag {
+    display: inline-block;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  &__title { margin-bottom: 10px; }
+}
+
+// Location summary cards
+.wis-location-grid {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  @media (min-width: 641px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.wis-location-summary {
+  border: 1px solid $wis-border;
+  padding: 15px;
+  background: #f3f2f1;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__type {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #505a5f;
+  }
+
+  &__status {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  &__tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+// Water indicators
+.wis-indicator-grid {
+  display: grid;
+  gap: 20px;
+
+  @media (min-width: 641px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.wis-indicator {
+  border: 1px solid $wis-border;
+  padding: 15px;
+  background: #ffffff;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  &__value {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 8px;
+  }
+
+  &__unit {
+    font-size: 16px;
+    font-weight: normal;
+  }
+
+  &__trend {
+    font-size: 14px;
+    font-weight: normal;
+    color: #505a5f;
+  }
+
+  &__status {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: capitalize;
+
+    &--good, &--normal { color: $wis-good; }
+    &--elevated, &--moderate, &--caution { color: $wis-caution; }
+    &--poor { color: $wis-poor; }
+  }
+}
+
+// Map placeholder – structured for Defra Accessible Maps replacement
+.wis-map-container {
+  margin-bottom: 30px;
+}
+
+.wis-map-placeholder {
+  background: #e8f4ea;
+  border: 2px dashed $wis-good;
+  padding: 20px;
+  min-height: 280px;
+
+  &__markers {
+    margin-top: 15px;
+
+    li {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.wis-map-marker {
+  display: inline-flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+// Map legend
+.wis-map-legend {
+  background: #f3f2f1;
+  border: 1px solid $wis-border;
+  padding: 15px;
+  margin-bottom: 20px;
+
+  &__list li {
+    margin-bottom: 8px;
+  }
+}
+
+// Timeline
+.wis-timeline {
+  position: relative;
+  padding-left: 30px;
+
+  &__item {
+    position: relative;
+    padding-bottom: 20px;
+    border-left: 2px solid $wis-border;
+    padding-left: 20px;
+    margin-left: 10px;
+
+    &:last-child {
+      border-left-color: transparent;
+      padding-bottom: 0;
+    }
+  }
+
+  &__marker {
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #0b0c0c;
+    border: 2px solid #ffffff;
+  }
+
+  &__item--sewage .wis-timeline__marker { background: $wis-poor; }
+  &__item--pollution .wis-timeline__marker { background: $wis-poor; }
+  &__item--algae .wis-timeline__marker { background: $wis-caution; }
+  &__item--normal .wis-timeline__marker { background: $wis-good; }
+}
+
+// Chat interface
+.wis-chat {
+  border: 1px solid $wis-border;
+  padding: 20px;
+  background: #ffffff;
+  max-height: 600px;
+  overflow-y: auto;
+
+  &__message {
+    margin-bottom: 15px;
+    display: flex;
+
+    &--user {
+      justify-content: flex-end;
+    }
+  }
+
+  &__bubble {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #f3f2f1;
+
+    .wis-chat__message--user & {
+      background: #1d70b8;
+      color: #ffffff;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__follow-up {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid $wis-border;
+  }
+
+  &__suggestions {
+    margin-top: 30px;
+  }
+}
+
+// Service navigation
+.wis-service-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid $wis-border;
+  margin-bottom: 20px;
+
+  &__current {
+    font-weight: bold;
+    text-decoration: none;
+    color: #0b0c0c;
+    pointer-events: none;
+  }
+}
+
+// Trend placeholder
+.wis-trend-placeholder {
+  min-height: 120px;
+}
+
+// Warning panel variants
+.wis-warning-panel--sewage,
+.wis-warning-panel--health,
+.wis-warning-panel--issues {
+  margin-bottom: 15px;
+}

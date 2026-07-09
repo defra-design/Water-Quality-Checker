@@ -1,0 +1,58 @@
+[
+  {
+    "id": "swim-today",
+    "question": "Can I swim here today?",
+    "keywords": ["swim", "swimming", "today", "safe to swim"],
+    "response": "Whether you can swim depends on the specific location and today's conditions. Check the confidence status on your local overview or location page.\n\nGenerally, avoid swimming for at least 48 hours after heavy rainfall or a reported sewage discharge. Look for elevated bacteria levels, active pollution investigations, or algae warnings.\n\nFor designated bathing waters, also check the official Swimfo bathing water profile for seasonal classification.",
+    "followUp": ["sewage-discharge", "after-rain", "e-coli"]
+  },
+  {
+    "id": "sewage-discharge",
+    "question": "Has there been a sewage discharge?",
+    "keywords": ["sewage", "discharge", "overflow", "storm overflow", "edf"],
+    "response": "Sewage discharges from storm overflows are reported by water companies through Event Duration Monitoring (EDM).\n\nOn your local overview, look for 'Recent sewage discharges'. If a discharge occurred in the last 48–72 hours near your location, we recommend avoiding full immersion swimming.\n\nStorm overflows are designed to operate during heavy rainfall to prevent sewage backing up into homes. They are a known risk factor for temporary water quality deterioration.",
+    "followUp": ["after-rain", "swim-today", "e-coli"]
+  },
+  {
+    "id": "river-colour",
+    "question": "Why has the river changed colour?",
+    "keywords": ["colour", "color", "discoloured", "brown", "green", "murky"],
+    "response": "Changes in river colour can have several causes:\n\n**Brown or murky water** – Often caused by sediment stirred up by high flow after rainfall, or soil runoff from fields.\n\n**Green water** – May indicate algae growth, especially in warm, slow-moving water.\n\n**Grey or foamy water** – Could suggest pollution. Report this to the Environment Agency on 0800 80 70 60.\n\nCheck the pollution incidents and algae warnings on your location page for more detail.",
+    "followUp": ["algae", "high-flow", "sewage-discharge"]
+  },
+  {
+    "id": "dog-safety",
+    "question": "Is it safe for my dog?",
+    "keywords": ["dog", "pet", "pets", "animals"],
+    "response": "Dogs are often more at risk than humans because they drink water and lick their fur after swimming.\n\nAvoid letting your dog enter water when:\n- There is a blue-green algae warning\n- A pollution incident is under investigation\n- Sewage discharges have been reported recently\n\nAlways rinse your dog after contact with open water. Blue-green algae can be fatal to dogs even in small amounts.",
+    "followUp": ["algae", "sewage-discharge", "swim-today"]
+  },
+  {
+    "id": "e-coli",
+    "question": "What does E. coli mean?",
+    "keywords": ["e. coli", "e coli", "ecoli", "bacteria"],
+    "response": "**E. coli** (Escherichia coli) is a type of bacteria found in the gut of humans and animals. Its presence in water indicates faecal contamination.\n\nHigher levels suggest a greater risk of illness from swallowing water. This does not necessarily mean the water will make you ill, but the risk is higher.\n\nBathing water standards set thresholds for E. coli. In our service, we flag levels as good, elevated, or poor to help you decide.",
+    "followUp": ["swim-today", "after-rain", "sewage-discharge"]
+  },
+  {
+    "id": "after-rain",
+    "question": "What happened after the recent rain?",
+    "keywords": ["rain", "rainfall", "storm", "wet weather", "flooding"],
+    "response": "Rainfall affects water conditions in several ways:\n\n- **River levels and flow increase**, which can stir up sediment and make water murky\n- **Runoff from roads and fields** carries pollutants into rivers\n- **Storm overflows** may operate at sewage treatment works\n- **Bacteria levels** often rise temporarily\n\nWe recommend waiting 48 hours after heavy rain before swimming. Your local overview shows rainfall over the last 24–72 hours.",
+    "followUp": ["high-flow", "sewage-discharge", "swim-today"]
+  },
+  {
+    "id": "high-flow",
+    "question": "What does high river flow mean?",
+    "keywords": ["flow", "high flow", "fast", "current", "river level"],
+    "response": "**River flow** measures how much water is moving through the river, usually in cubic metres per second (m³/s).\n\n**High flow** means:\n- The river is running faster than usual – take care near the water's edge\n- Sediment may make water murky\n- Water quality samples may be temporarily affected\n\nHigh flow after rainfall is normal, but it can combine with other factors like sewage discharges to reduce confidence in water quality.",
+    "followUp": ["after-rain", "river-colour", "swim-today"]
+  },
+  {
+    "id": "algae",
+    "question": "What is blue-green algae?",
+    "keywords": ["algae", "blue-green", "cyanobacteria", "bloom"],
+    "response": "**Blue-green algae** (cyanobacteria) are microscopic organisms that can multiply rapidly in warm, nutrient-rich water, forming visible blooms.\n\nThey can produce toxins harmful to humans and animals. Symptoms include skin rashes, stomach upsets, and – in dogs – serious illness or death.\n\nIf you see green scum on the water surface, or receive an algae warning, keep away from the affected area and report it to the Environment Agency.",
+    "followUp": ["dog-safety", "swim-today", "river-colour"]
+  }
+]

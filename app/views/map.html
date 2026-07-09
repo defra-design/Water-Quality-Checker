@@ -1,0 +1,85 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/tabs/macro.njk" import govukTabs %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "components/map-legend.html" import mapLegend %}
+{% from "components/location-summary.html" import locationSummary %}
+{% from "components/service-nav.html" import serviceNavigation %}
+
+{% set pageName="Map and list" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+
+    {{ serviceNavigation("map", postcode) }}
+
+    <h1 class="govuk-heading-l">Water locations near {{ postcode }}</h1>
+    <p class="govuk-body">Explore nearby water locations. You can use the map, list or table — all show the same information.</p>
+
+    {{ mapLegend() }}
+
+    <div class="wis-map-container" id="wis-map" role="region" aria-label="Map of nearby water locations">
+      <div class="wis-map-placeholder">
+        <p class="govuk-body"><strong>Interactive map placeholder</strong></p>
+        <p class="govuk-body-s">This prototype is structured for the <a class="govuk-link" href="https://digital.defra.gov.uk/architecture-and-software-development/defra-accessible-maps" rel="noreferrer">Defra Accessible Maps</a> plugin. In production, an accessible map would display location markers here.</p>
+        <ul class="wis-map-placeholder__markers govuk-list">
+          {% for location in locations %}
+          <li>
+            <a class="govuk-link wis-map-marker wis-map-marker--{{ location.overallStatus }}" href="/location/{{ location.id }}?postcode={{ postcode }}" data-location-id="{{ location.id }}">
+              <span class="wis-status-indicator wis-status-indicator--{{ location.overallStatus }}" aria-hidden="true"></span>
+              {{ location.name }} – {{ location.statusLabel }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    {% set listPanelHtml %}
+    <div class="wis-location-grid">
+      {% for location in locations %}
+      {{ locationSummary(location) }}
+      {% endfor %}
+    </div>
+    {% endset %}
+
+    {% set tablePanelHtml %}
+    <div class="govuk-table-responsive">
+      {{ govukTable({
+        head: [
+          { text: "Location" },
+          { text: "Type" },
+          { text: "Status" },
+          { text: "Sewage discharge (72h)" },
+          { text: "Algae alert" },
+          { text: "Water temperature" }
+        ],
+        rows: tableRows
+      }) }}
+    </div>
+    {% endset %}
+
+    {{ govukTabs({
+      items: [
+        {
+          label: "List view",
+          id: "list-view",
+          attributes: { "data-tab": "list" },
+          panel: { html: listPanelHtml }
+        },
+        {
+          label: "Table view",
+          id: "table-view",
+          attributes: { "data-tab": "table" },
+          panel: { html: tablePanelHtml }
+        }
+      ]
+    }) }}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block pageScripts %}
+<script src="/public/javascripts/map.js"></script>
+{% endblock %}

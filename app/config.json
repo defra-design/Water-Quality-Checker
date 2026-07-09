@@ -1,0 +1,9 @@
+{
+  "serviceName": "Water Intelligence Service",
+  "useServiceNavigation": true,
+  "plugins": {
+    "govuk-frontend": {
+      "rebrand": true
+    }
+  }
+}

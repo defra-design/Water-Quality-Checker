@@ -1,0 +1,27 @@
+{#
+  Warning panel – GOV.UK warning text pattern for alerts
+#}
+
+{% macro warningPanel(title, messages, type) %}
+<div class="govuk-warning-text wis-warning-panel wis-warning-panel--{{ type or 'warning' }}">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Warning</span>
+    {% if title %}{{ title }}{% endif %}
+    {% if messages %}
+    <ul class="govuk-list govuk-!-margin-top-1">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </strong>
+</div>
+{% endmacro %}
+
+{% macro insetPanel(title, content) %}
+<div class="govuk-inset-text">
+  {% if title %}<strong>{{ title }}</strong><br>{% endif %}
+  {{ content | safe }}
+</div>
+{% endmacro %}

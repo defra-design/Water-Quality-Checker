@@ -1,0 +1,29 @@
+{#
+  Question response – chatbot message bubble
+#}
+
+{% macro questionBubble(text, isUser) %}
+<div class="wis-chat__message wis-chat__message--{% if isUser %}user{% else %}bot{% endif %}">
+  <div class="wis-chat__bubble">
+    {% if isUser %}
+    <span class="govuk-visually-hidden">You said:</span>
+    {% else %}
+    <span class="govuk-visually-hidden">Service replied:</span>
+    {% endif %}
+    {{ text | safe }}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro suggestedQuestions(questions) %}
+<div class="wis-chat__suggestions">
+  <h3 class="govuk-heading-s">Suggested questions</h3>
+  <ul class="govuk-list">
+    {% for question in questions %}
+    <li>
+      <a class="govuk-link" href="/ask?question={{ question.id }}">{{ question.question }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}

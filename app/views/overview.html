@@ -1,0 +1,154 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "components/status-card.html" import statusCard %}
+{% from "components/location-summary.html" import locationSummary %}
+{% from "components/warning-panel.html" import warningPanel, insetPanel %}
+{% from "components/water-indicator.html" import waterIndicator %}
+{% from "components/service-nav.html" import serviceNavigation %}
+
+{% set pageName="Local overview" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+
+    {{ serviceNavigation("overview", overview.postcode) }}
+
+    <span class="govuk-caption-l">{{ overview.area }}</span>
+    <h1 class="govuk-heading-l">Water conditions near {{ overview.postcode }}</h1>
+
+    {% if overview.isDefaultArea %}
+    <div class="govuk-inset-text">
+      <p class="govuk-body">We could not find exact data for this postcode, so we are showing information for the nearest available area ({{ overview.area }}).</p>
+    </div>
+    {% endif %}
+
+    {{ statusCard(
+      overview.overallConfidence,
+      "Overall confidence for your area",
+      overview.summary,
+      overview.overallConfidence
+    ) }}
+
+    <div class="govuk-button-group govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+      {{ govukButton({ text: "View on map", href: "/map?postcode=" + overview.postcode }) }}
+      {{ govukButton({ text: "Ask a question", href: "/ask?postcode=" + overview.postcode, classes: "govuk-button--secondary" }) }}
+    </div>
+
+    {% if overview.healthWarnings.length > 0 or overview.sewageDischarges.length > 0 or overview.algaeAlerts.length > 0 %}
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="warnings-heading">
+      <h2 class="govuk-heading-m" id="warnings-heading">Active warnings in your area</h2>
+      {% if overview.sewageDischarges.length > 0 %}
+      {{ warningPanel("Recent sewage discharges reported", ["Check individual locations before swimming. Wait at least 48 hours after a discharge before full immersion."], "sewage") }}
+      {% endif %}
+      {% if overview.algaeAlerts.length > 0 %}
+      {{ warningPanel("Algae alerts active", ["Keep dogs away from affected water. Do not enter areas with visible scum."], "algae") }}
+      {% endif %}
+      {% if overview.healthWarnings.length > 0 %}
+      {{ warningPanel("Health warnings in place", ["Review location pages for specific advice."], "health") }}
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="factors-heading">
+      <h2 class="govuk-heading-m" id="factors-heading">What is affecting conditions</h2>
+      <p class="govuk-body">These factors are combined to help answer: <strong>would I feel confident using the water here today?</strong></p>
+
+      <div class="wis-indicator-grid">
+        {% set rainfallStatus = "elevated" if overview.avgRainfall > 10 else "normal" %}
+        {{ waterIndicator(
+          "Rainfall (last 24 hours)",
+          overview.avgRainfall | round(1),
+          "mm",
+          rainfallStatus,
+          "Heavy rain washes pollutants from land into rivers and can trigger storm overflows at sewage works. Water quality often improves 48 hours after rainfall stops."
+        ) }}
+
+        {% set sewageUnit = "of " ~ overview.nearbyLocations.length %}
+        {% set sewageStatus = "elevated" if overview.sewageDischarges.length > 0 else "good" %}
+        {{ waterIndicator(
+          "Locations with sewage discharges",
+          overview.sewageDischarges.length,
+          sewageUnit,
+          sewageStatus,
+          "Storm overflow discharges are reported by water companies. They are more likely during and after heavy rainfall."
+        ) }}
+
+        {% set pollutionStatus = "elevated" if overview.pollutionIncidents.length > 0 else "good" %}
+        {{ waterIndicator(
+          "Pollution incidents",
+          overview.pollutionIncidents.length,
+          "active reports",
+          pollutionStatus,
+          "Pollution incidents are reported to the Environment Agency. An active investigation means you should avoid the affected water."
+        ) }}
+
+        {% set algaeStatus = "elevated" if overview.algaeAlerts.length > 0 else "good" %}
+        {{ waterIndicator(
+          "Algae alerts",
+          overview.algaeAlerts.length,
+          "locations",
+          algaeStatus,
+          "Blue-green algae can produce toxins harmful to people and animals, especially dogs."
+        ) }}
+      </div>
+    </section>
+
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="rivers-heading">
+      <h2 class="govuk-heading-m" id="rivers-heading">Rivers ({{ overview.rivers.length }})</h2>
+      <p class="govuk-body-s">River level and flow affect safety and water clarity. High flow after rain is normal but can temporarily reduce water quality.</p>
+      <div class="wis-location-grid">
+        {% for location in overview.rivers %}
+        {{ locationSummary(location) }}
+        {% endfor %}
+      </div>
+    </section>
+
+    {% if overview.lakes.length > 0 %}
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="lakes-heading">
+      <h2 class="govuk-heading-m" id="lakes-heading">Lakes ({{ overview.lakes.length }})</h2>
+      <p class="govuk-body-s">Lakes can be affected by algae, especially in warm weather after rainfall.</p>
+      <div class="wis-location-grid">
+        {% for location in overview.lakes %}
+        {{ locationSummary(location) }}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if overview.reservoirs.length > 0 %}
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="reservoirs-heading">
+      <h2 class="govuk-heading-m" id="reservoirs-heading">Reservoirs ({{ overview.reservoirs.length }})</h2>
+      <p class="govuk-body-s">Many reservoirs are managed for water supply. Public access and activities vary.</p>
+      <div class="wis-location-grid">
+        {% for location in overview.reservoirs %}
+        {{ locationSummary(location) }}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if overview.bathingWaters.length > 0 %}
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="bathing-heading">
+      <h2 class="govuk-heading-m" id="bathing-heading">Designated bathing waters ({{ overview.bathingWaters.length }})</h2>
+      <p class="govuk-body-s">Official bathing water classifications are based on samples from last season. Today's conditions may differ — especially after rainfall.</p>
+      <div class="wis-location-grid">
+        {% for location in overview.bathingWaters %}
+        {{ locationSummary(location) }}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">About this data</span>
+      </summary>
+      <div class="govuk-details__text">
+        <p class="govuk-body">This prototype uses mock data structured for future API integration with the Environment Agency, Met Office, Thames Water and other sources. Data was last refreshed for demonstration purposes.</p>
+      </div>
+    </details>
+
+  </div>
+</div>
+{% endblock %}

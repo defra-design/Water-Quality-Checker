@@ -1,0 +1,519 @@
+[
+  {
+    "id": "river-thames-caversham",
+    "name": "River Thames at Caversham",
+    "location": "Caversham, Reading, Berkshire",
+    "postcode": "RG4 8BY",
+    "waterbodyType": "river",
+    "coordinates": { "lat": 51.4672, "lng": -0.9695 },
+    "overallStatus": "caution",
+    "confidenceLevel": "moderate",
+    "confidenceSummary": "Conditions are mixed. Recent rainfall has increased river flow, and a sewage discharge was reported upstream 18 hours ago. Swimming is not recommended today, but paddling may be acceptable with care.",
+    "recentSewageDischarge": {
+      "occurred": true,
+      "when": "2026-07-08T18:30:00Z",
+      "description": "Storm overflow discharge reported upstream at Reading sewage treatment works",
+      "duration": "2 hours 15 minutes",
+      "source": "Thames Water EDM data"
+    },
+    "recentRainfall": {
+      "last24h": 12.4,
+      "last48h": 18.7,
+      "last72h": 22.1,
+      "unit": "mm",
+      "summary": "Heavy rainfall in the last 24 hours has increased runoff into the river"
+    },
+    "riverLevel": {
+      "value": 1.42,
+      "unit": "m",
+      "trend": "rising",
+      "normalRange": "0.8 – 1.2 m",
+      "status": "above normal"
+    },
+    "flow": {
+      "value": 18.6,
+      "unit": "m³/s",
+      "trend": "rising",
+      "status": "high"
+    },
+    "waterTemperature": {
+      "value": 19.2,
+      "unit": "°C",
+      "trend": "stable"
+    },
+    "pollutionIncidents": [
+      {
+        "date": "2026-07-05",
+        "type": "Agricultural runoff",
+        "description": "Minor pollution report near Sonning. Environment Agency attended and found elevated nutrient levels.",
+        "status": "resolved"
+      }
+    ],
+    "algaeWarning": {
+      "active": false,
+      "type": null,
+      "description": "No algae alerts currently in place"
+    },
+    "healthWarning": {
+      "active": true,
+      "type": "bathing advisory",
+      "description": "Avoid full immersion swimming for 48 hours after the recent storm overflow discharge"
+    },
+    "bathingWaterWarning": null,
+    "recommendedActivities": {
+      "swimming": "not recommended",
+      "paddling": "caution",
+      "fishing": "acceptable",
+      "dogWalking": "caution"
+    },
+    "waterChemistry": {
+      "eColi": { "value": 420, "unit": "cfu/100ml", "status": "elevated" },
+      "intestinalEnterococci": { "value": 180, "unit": "cfu/100ml", "status": "elevated" },
+      "dissolvedOxygen": { "value": 7.8, "unit": "mg/L", "status": "good" },
+      "ph": { "value": 7.4, "unit": "", "status": "normal" },
+      "turbidity": { "value": 12, "unit": "NTU", "status": "elevated" },
+      "nitrate": { "value": 2.1, "unit": "mg/L", "status": "normal" },
+      "phosphate": { "value": 0.08, "unit": "mg/L", "status": "normal" },
+      "ammonia": { "value": 0.04, "unit": "mg/L", "status": "normal" },
+      "conductivity": { "value": 450, "unit": "µS/cm", "status": "normal" },
+      "chlorophyll": { "value": 8.2, "unit": "µg/L", "status": "normal" }
+    },
+    "latestIssues": [
+      "Storm overflow discharge 18 hours ago upstream",
+      "River level above normal following heavy rain",
+      "Elevated bacteria levels detected in latest sample"
+    ],
+    "recreationAdvice": "Paddling and fishing may be acceptable, but avoid swallowing water. Do not swim today. Keep dogs on a lead near the water and rinse them after contact.",
+    "healthAdvice": "Wash hands after contact with river water. Cover cuts and grazes. Seek medical advice if you become unwell after contact with the water.",
+    "dataSources": [
+      { "name": "Environment Agency hydrology", "url": "https://environment.data.gov.uk/" },
+      { "name": "Thames Water EDM", "url": "https://www.thameswater.co.uk/" },
+      { "name": "Met Office rainfall", "url": "https://www.metoffice.gov.uk/" }
+    ],
+    "lastUpdated": "2026-07-09T08:00:00Z",
+    "futureApiSource": "EA Hydrology API, Thames Water EDM API, Met Office DataPoint",
+    "nearbyLocationIds": ["river-kennet-reading", "dinton-pastures-lake", "river-thames-wallingford"]
+  },
+  {
+    "id": "river-kennet-reading",
+    "name": "River Kennet at Reading",
+    "location": "Reading town centre, Berkshire",
+    "postcode": "RG1 3DH",
+    "waterbodyType": "river",
+    "coordinates": { "lat": 51.4545, "lng": -0.9712 },
+    "overallStatus": "good",
+    "confidenceLevel": "high",
+    "confidenceSummary": "Conditions are generally good for recreational use. No recent sewage discharges reported and water quality samples are within expected ranges.",
+    "recentSewageDischarge": {
+      "occurred": false,
+      "when": null,
+      "description": "No storm overflow discharges reported in the last 72 hours",
+      "duration": null,
+      "source": "Thames Water EDM data"
+    },
+    "recentRainfall": {
+      "last24h": 11.8,
+      "last48h": 17.2,
+      "last72h": 20.5,
+      "unit": "mm",
+      "summary": "Recent rainfall has had a minor effect on water clarity"
+    },
+    "riverLevel": {
+      "value": 0.68,
+      "unit": "m",
+      "trend": "stable",
+      "normalRange": "0.5 – 0.9 m",
+      "status": "normal"
+    },
+    "flow": {
+      "value": 4.2,
+      "unit": "m³/s",
+      "trend": "stable",
+      "status": "normal"
+    },
+    "waterTemperature": {
+      "value": 18.8,
+      "unit": "°C",
+      "trend": "rising slowly"
+    },
+    "pollutionIncidents": [],
+    "algaeWarning": {
+      "active": false,
+      "type": null,
+      "description": "No algae alerts currently in place"
+    },
+    "healthWarning": {
+      "active": false,
+      "type": null,
+      "description": "No health warnings in place"
+    },
+    "bathingWaterWarning": null,
+    "recommendedActivities": {
+      "swimming": "acceptable with care",
+      "paddling": "acceptable",
+      "fishing": "acceptable",
+      "dogWalking": "acceptable with care"
+    },
+    "waterChemistry": {
+      "eColi": { "value": 95, "unit": "cfu/100ml", "status": "good" },
+      "intestinalEnterococci": { "value": 42, "unit": "cfu/100ml", "status": "good" },
+      "dissolvedOxygen": { "value": 8.4, "unit": "mg/L", "status": "good" },
+      "ph": { "value": 7.6, "unit": "", "status": "normal" },
+      "turbidity": { "value": 5, "unit": "NTU", "status": "good" },
+      "nitrate": { "value": 1.8, "unit": "mg/L", "status": "normal" },
+      "phosphate": { "value": 0.05, "unit": "mg/L", "status": "normal" },
+      "ammonia": { "value": 0.02, "unit": "mg/L", "status": "normal" },
+      "conductivity": { "value": 520, "unit": "µS/cm", "status": "normal" },
+      "chlorophyll": { "value": 5.1, "unit": "µg/L", "status": "normal" }
+    },
+    "latestIssues": [],
+    "recreationAdvice": "Good conditions for paddling and fishing. Wild swimming is possible but always check local conditions on the day and avoid after heavy rain.",
+    "healthAdvice": "Standard precautions apply: avoid swallowing water and wash hands after contact.",
+    "dataSources": [
+      { "name": "Environment Agency hydrology", "url": "https://environment.data.gov.uk/" },
+      { "name": "Thames Water EDM", "url": "https://www.thameswater.co.uk/" },
+      { "name": "River Kennet citizen science", "url": "https://www.riverkennet.org/" }
+    ],
+    "lastUpdated": "2026-07-09T07:30:00Z",
+    "futureApiSource": "EA Hydrology API, Thames Water EDM API",
+    "nearbyLocationIds": ["river-thames-caversham", "river-loddon-winnersh", "dinton-pastures-lake"]
+  },
+  {
+    "id": "river-loddon-winnersh",
+    "name": "River Loddon at Winnersh",
+    "location": "Winnersh, Wokingham, Berkshire",
+    "postcode": "RG41 5NA",
+    "waterbodyType": "river",
+    "coordinates": { "lat": 51.4288, "lng": -0.8701 },
+    "overallStatus": "poor",
+    "confidenceLevel": "low",
+    "confidenceSummary": "Several factors suggest you should not use this water for recreation today. A pollution incident was reported yesterday and bacteria levels are elevated.",
+    "recentSewageDischarge": {
+      "occurred": true,
+      "when": "2026-07-08T06:15:00Z",
+      "description": "Storm overflow discharge at Arborfield sewage treatment works",
+      "duration": "3 hours 40 minutes",
+      "source": "Thames Water EDM data"
+    },
+    "recentRainfall": {
+      "last24h": 14.2,
+      "last48h": 21.0,
+      "last72h": 25.8,
+      "unit": "mm",
+      "summary": "Sustained heavy rainfall has increased agricultural runoff into the catchment"
+    },
+    "riverLevel": {
+      "value": 0.95,
+      "unit": "m",
+      "trend": "rising",
+      "normalRange": "0.4 – 0.7 m",
+      "status": "well above normal"
+    },
+    "flow": {
+      "value": 6.8,
+      "unit": "m³/s",
+      "trend": "rising",
+      "status": "very high"
+    },
+    "waterTemperature": {
+      "value": 17.5,
+      "unit": "°C",
+      "trend": "falling"
+    },
+    "pollutionIncidents": [
+      {
+        "date": "2026-07-08",
+        "type": "Unknown source",
+        "description": "Reports of discoloured water and odour. Environment Agency investigation ongoing.",
+        "status": "under investigation"
+      }
+    ],
+    "algaeWarning": {
+      "active": false,
+      "type": null,
+      "description": "No algae alerts currently in place"
+    },
+    "healthWarning": {
+      "active": true,
+      "type": "pollution advisory",
+      "description": "Avoid all contact with the water until further notice due to ongoing pollution investigation"
+    },
+    "bathingWaterWarning": null,
+    "recommendedActivities": {
+      "swimming": "not recommended",
+      "paddling": "not recommended",
+      "fishing": "not recommended",
+      "dogWalking": "not recommended"
+    },
+    "waterChemistry": {
+      "eColi": { "value": 1200, "unit": "cfu/100ml", "status": "poor" },
+      "intestinalEnterococci": { "value": 520, "unit": "cfu/100ml", "status": "poor" },
+      "dissolvedOxygen": { "value": 6.2, "unit": "mg/L", "status": "moderate" },
+      "ph": { "value": 7.1, "unit": "", "status": "normal" },
+      "turbidity": { "value": 28, "unit": "NTU", "status": "poor" },
+      "nitrate": { "value": 4.8, "unit": "mg/L", "status": "elevated" },
+      "phosphate": { "value": 0.22, "unit": "mg/L", "status": "elevated" },
+      "ammonia": { "value": 0.18, "unit": "mg/L", "status": "elevated" },
+      "conductivity": { "value": 680, "unit": "µS/cm", "status": "elevated" },
+      "chlorophyll": { "value": 14.5, "unit": "µg/L", "status": "elevated" }
+    },
+    "latestIssues": [
+      "Active pollution investigation",
+      "Storm overflow discharge yesterday",
+      "Discoloured water reported by members of the public",
+      "Very high river flow"
+    ],
+    "recreationAdvice": "Do not enter the water. Keep children and pets away from the riverbank.",
+    "healthAdvice": "If you have had contact with the water in the last 48 hours and feel unwell, contact NHS 111. Report pollution to the Environment Agency on 0800 80 70 60.",
+    "dataSources": [
+      { "name": "Environment Agency incident reports", "url": "https://environment.data.gov.uk/" },
+      { "name": "Thames Water EDM", "url": "https://www.thameswater.co.uk/" },
+      { "name": "Citizen pollution reports", "url": "#" }
+    ],
+    "lastUpdated": "2026-07-09T09:15:00Z",
+    "futureApiSource": "EA Pollution Inventory, Thames Water EDM API, EA Hydrology API",
+    "nearbyLocationIds": ["river-kennet-reading", "dinton-pastures-lake", "queen-mother-reservoir"]
+  },
+  {
+    "id": "dinton-pastures-lake",
+    "name": "Dinton Pastures Lake",
+    "location": "Hurst, Wokingham, Berkshire",
+    "postcode": "RG10 0TH",
+    "waterbodyType": "lake",
+    "coordinates": { "lat": 51.4367, "lng": -0.8892 },
+    "overallStatus": "caution",
+    "confidenceLevel": "moderate",
+    "confidenceSummary": "The lake is generally well used for recreation, but a blue-green algae advisory is in place in one area. Check the map for affected zones.",
+    "recentSewageDischarge": {
+      "occurred": false,
+      "when": null,
+      "description": "No sewage discharges affect this lake",
+      "duration": null,
+      "source": "N/A – enclosed water body"
+    },
+    "recentRainfall": {
+      "last24h": 10.5,
+      "last48h": 16.8,
+      "last72h": 19.2,
+      "unit": "mm",
+      "summary": "Warm weather following rain may encourage algae growth"
+    },
+    "riverLevel": null,
+    "flow": null,
+    "waterTemperature": {
+      "value": 21.4,
+      "unit": "°C",
+      "trend": "rising"
+    },
+    "pollutionIncidents": [],
+    "algaeWarning": {
+      "active": true,
+      "type": "blue-green algae",
+      "description": "Low levels of blue-green algae detected in the northern bay. Avoid this area and keep dogs away."
+    },
+    "healthWarning": {
+      "active": true,
+      "type": "algae advisory",
+      "description": "Do not enter the northern bay. Rinse skin and dog fur after any contact with lake water."
+    },
+    "bathingWaterWarning": null,
+    "recommendedActivities": {
+      "swimming": "caution",
+      "paddling": "caution",
+      "fishing": "acceptable",
+      "dogWalking": "caution"
+    },
+    "waterChemistry": {
+      "eColi": { "value": 180, "unit": "cfu/100ml", "status": "moderate" },
+      "intestinalEnterococci": { "value": 75, "unit": "cfu/100ml", "status": "moderate" },
+      "dissolvedOxygen": { "value": 8.1, "unit": "mg/L", "status": "good" },
+      "ph": { "value": 8.0, "unit": "", "status": "normal" },
+      "turbidity": { "value": 8, "unit": "NTU", "status": "good" },
+      "nitrate": { "value": 0.9, "unit": "mg/L", "status": "normal" },
+      "phosphate": { "value": 0.04, "unit": "mg/L", "status": "normal" },
+      "ammonia": { "value": 0.01, "unit": "mg/L", "status": "normal" },
+      "conductivity": { "value": 380, "unit": "µS/cm", "status": "normal" },
+      "chlorophyll": { "value": 22.4, "unit": "µg/L", "status": "elevated" }
+    },
+    "latestIssues": [
+      "Blue-green algae advisory in northern bay",
+      "Water temperature rising – algae risk may increase"
+    ],
+    "recreationAdvice": "Swimming and paddling are acceptable in the main lake area away from the northern bay. Follow onsite signage. Fishing is permitted.",
+    "healthAdvice": "Blue-green algae can cause skin irritation and illness if swallowed. Do not let dogs drink lake water.",
+    "dataSources": [
+      { "name": "Wokingham Borough Council", "url": "https://www.wokingham.gov.uk/" },
+      { "name": "Environment Agency algae monitoring", "url": "https://environment.data.gov.uk/" },
+      { "name": "Citizen science – lake watch", "url": "#" }
+    ],
+    "lastUpdated": "2026-07-09T06:45:00Z",
+    "futureApiSource": "Local authority open data, EA water quality samples",
+    "nearbyLocationIds": ["river-loddon-winnersh", "river-kennet-reading", "queen-mother-reservoir"]
+  },
+  {
+    "id": "queen-mother-reservoir",
+    "name": "Queen Mother Reservoir",
+    "location": "Datchet, Windsor and Maidenhead",
+    "postcode": "SL3 9NT",
+    "waterbodyType": "reservoir",
+    "coordinates": { "lat": 51.4845, "lng": -0.5412 },
+    "overallStatus": "good",
+    "confidenceLevel": "high",
+    "confidenceSummary": "This is a managed reservoir used for water supply. Public access is limited but sailing is permitted. Water quality for the reservoir is good with no current warnings.",
+    "recentSewageDischarge": {
+      "occurred": false,
+      "when": null,
+      "description": "Not applicable – managed reservoir",
+      "duration": null,
+      "source": "N/A"
+    },
+    "recentRainfall": {
+      "last24h": 9.8,
+      "last48h": 15.4,
+      "last72h": 18.0,
+      "unit": "mm",
+      "summary": "Reservoir levels are healthy following recent rainfall"
+    },
+    "riverLevel": null,
+    "flow": null,
+    "waterTemperature": {
+      "value": 17.2,
+      "unit": "°C",
+      "trend": "stable"
+    },
+    "pollutionIncidents": [],
+    "algaeWarning": {
+      "active": false,
+      "type": null,
+      "description": "No algae alerts currently in place"
+    },
+    "healthWarning": {
+      "active": false,
+      "type": null,
+      "description": "No health warnings in place"
+    },
+    "bathingWaterWarning": null,
+    "recommendedActivities": {
+      "swimming": "not permitted",
+      "paddling": "not permitted",
+      "fishing": "permit required",
+      "dogWalking": "restricted"
+    },
+    "waterChemistry": {
+      "eColi": { "value": 12, "unit": "cfu/100ml", "status": "good" },
+      "intestinalEnterococci": { "value": 8, "unit": "cfu/100ml", "status": "good" },
+      "dissolvedOxygen": { "value": 9.2, "unit": "mg/L", "status": "good" },
+      "ph": { "value": 7.5, "unit": "", "status": "normal" },
+      "turbidity": { "value": 2, "unit": "NTU", "status": "good" },
+      "nitrate": { "value": 0.5, "unit": "mg/L", "status": "normal" },
+      "phosphate": { "value": 0.01, "unit": "mg/L", "status": "normal" },
+      "ammonia": { "value": 0.005, "unit": "mg/L", "status": "normal" },
+      "conductivity": { "value": 290, "unit": "µS/cm", "status": "normal" },
+      "chlorophyll": { "value": 3.2, "unit": "µg/L", "status": "normal" }
+    },
+    "latestIssues": [],
+    "recreationAdvice": "Sailing and windsurfing are permitted with club membership. Swimming and paddling are not allowed. Check Thames Water access arrangements.",
+    "healthAdvice": "This is a drinking water source. Follow all onsite access rules.",
+    "dataSources": [
+      { "name": "Thames Water", "url": "https://www.thameswater.co.uk/" },
+      { "name": "Environment Agency", "url": "https://environment.data.gov.uk/" }
+    ],
+    "lastUpdated": "2026-07-09T05:00:00Z",
+    "futureApiSource": "Thames Water operational data API",
+    "nearbyLocationIds": ["river-thames-caversham", "dinton-pastures-lake"]
+  },
+  {
+    "id": "river-thames-wallingford",
+    "name": "River Thames at Wallingford (designated bathing water)",
+    "location": "Wallingford, Oxfordshire",
+    "postcode": "OX10 0EB",
+    "waterbodyType": "bathing water",
+    "coordinates": { "lat": 51.5998, "lng": -1.1248 },
+    "overallStatus": "caution",
+    "confidenceLevel": "moderate",
+    "confidenceSummary": "This is a designated inland bathing water. Classification is 'good' based on last season's samples, but recent rainfall and an upstream discharge mean extra caution is advised today.",
+    "recentSewageDischarge": {
+      "occurred": true,
+      "when": "2026-07-07T22:00:00Z",
+      "description": "Storm overflow discharge reported upstream at Benson",
+      "duration": "1 hour 50 minutes",
+      "source": "Thames Water EDM data"
+    },
+    "recentRainfall": {
+      "last24h": 13.6,
+      "last48h": 19.8,
+      "last72h": 24.2,
+      "unit": "mm",
+      "summary": "Heavy rainfall may temporarily affect bathing water quality"
+    },
+    "riverLevel": {
+      "value": 1.18,
+      "unit": "m",
+      "trend": "falling",
+      "normalRange": "0.7 – 1.1 m",
+      "status": "above normal"
+    },
+    "flow": {
+      "value": 22.4,
+      "unit": "m³/s",
+      "trend": "falling",
+      "status": "high"
+    },
+    "waterTemperature": {
+      "value": 20.1,
+      "unit": "°C",
+      "trend": "stable"
+    },
+    "pollutionIncidents": [],
+    "algaeWarning": {
+      "active": false,
+      "type": null,
+      "description": "No algae alerts currently in place"
+    },
+    "healthWarning": {
+      "active": false,
+      "type": null,
+      "description": "No formal health warnings, but temporary advisory in place"
+    },
+    "bathingWaterWarning": {
+      "active": true,
+      "classification": "Good",
+      "seasonClassification": "Good (2025 season)",
+      "advisory": "Avoid swimming for 48 hours after the recent storm overflow and heavy rainfall",
+      "swimfoUrl": "https://environment.data.gov.uk/bwq/profiles/"
+    },
+    "recommendedActivities": {
+      "swimming": "caution",
+      "paddling": "acceptable",
+      "fishing": "acceptable",
+      "dogWalking": "caution"
+    },
+    "waterChemistry": {
+      "eColi": { "value": 310, "unit": "cfu/100ml", "status": "elevated" },
+      "intestinalEnterococci": { "value": 145, "unit": "cfu/100ml", "status": "elevated" },
+      "dissolvedOxygen": { "value": 8.0, "unit": "mg/L", "status": "good" },
+      "ph": { "value": 7.5, "unit": "", "status": "normal" },
+      "turbidity": { "value": 9, "unit": "NTU", "status": "moderate" },
+      "nitrate": { "value": 1.5, "unit": "mg/L", "status": "normal" },
+      "phosphate": { "value": 0.06, "unit": "mg/L", "status": "normal" },
+      "ammonia": { "value": 0.03, "unit": "mg/L", "status": "normal" },
+      "conductivity": { "value": 430, "unit": "µS/cm", "status": "normal" },
+      "chlorophyll": { "value": 6.8, "unit": "µg/L", "status": "normal" }
+    },
+    "latestIssues": [
+      "Storm overflow discharge 2 days ago upstream",
+      "Temporary bathing advisory after heavy rain",
+      "Season classification remains 'Good'"
+    ],
+    "recreationAdvice": "Wild swimming is popular here. Wait 48 hours after heavy rain before swimming. Check Swimfo for official bathing water profiles.",
+    "healthAdvice": "Shower after swimming. Avoid swallowing water. Children and vulnerable adults should take extra care after rainfall events.",
+    "dataSources": [
+      { "name": "Swimfo bathing water profiles", "url": "https://environment.data.gov.uk/bwq/profiles/" },
+      { "name": "Environment Agency", "url": "https://environment.data.gov.uk/" },
+      { "name": "Thames Water EDM", "url": "https://www.thameswater.co.uk/" }
+    ],
+    "lastUpdated": "2026-07-09T08:30:00Z",
+    "futureApiSource": "EA Bathing Water Quality API, Swimfo, Thames Water EDM API",
+    "nearbyLocationIds": ["river-thames-caversham", "river-kennet-reading"]
+  }
+]

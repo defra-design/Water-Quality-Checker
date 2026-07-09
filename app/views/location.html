@@ -1,0 +1,210 @@
+{% extends "layouts/main.html" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "components/status-card.html" import statusCard %}
+{% from "components/warning-panel.html" import warningPanel %}
+{% from "components/water-indicator.html" import waterIndicator %}
+{% from "components/timeline.html" import timeline %}
+{% from "components/location-summary.html" import locationSummary %}
+{% from "components/service-nav.html" import serviceNavigation %}
+
+{% set pageName=location.name %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {{ serviceNavigation("location", postcode) }}
+
+    <span class="govuk-caption-l">{{ location.waterbodyTypeLabel }} · {{ location.location }}</span>
+    <h1 class="govuk-heading-l">{{ location.name }}</h1>
+
+    {{ statusCard(
+      location.overallStatus,
+      "Current confidence",
+      location.confidenceSummary,
+      location.statusLabel
+    ) }}
+
+    {% if location.latestIssues.length > 0 %}
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="issues-heading">
+      <h2 class="govuk-heading-m" id="issues-heading">Latest known issues</h2>
+      {{ warningPanel(null, location.latestIssues, "issues") }}
+    </section>
+    {% endif %}
+
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="recreation-heading">
+      <h2 class="govuk-heading-m" id="recreation-heading">Recreation advice</h2>
+      <p class="govuk-body">{{ location.recreationAdvice }}</p>
+
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">Recommended activities today</caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Activity</th>
+            <th scope="col" class="govuk-table__header">Advice</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">Swimming</th>
+            <td class="govuk-table__cell">{{ location.recommendedActivities.swimming | activityLabel }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">Paddling</th>
+            <td class="govuk-table__cell">{{ location.recommendedActivities.paddling | activityLabel }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">Fishing</th>
+            <td class="govuk-table__cell">{{ location.recommendedActivities.fishing | activityLabel }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">Dogs</th>
+            <td class="govuk-table__cell">{{ location.recommendedActivities.dogWalking | activityLabel }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="conditions-heading">
+      <h2 class="govuk-heading-m" id="conditions-heading">Environmental conditions</h2>
+      <p class="govuk-body-s">What we know about conditions now and what they mean in plain English.</p>
+
+      <div class="wis-indicator-grid">
+        {% set rainfallStatus = "elevated" if location.recentRainfall.last24h > 10 else "normal" %}
+        {{ waterIndicator(
+          "Rainfall (24 hours)",
+          location.recentRainfall.last24h,
+          "mm",
+          rainfallStatus,
+          location.recentRainfall.summary
+        ) }}
+
+        {% if location.riverLevel %}
+        {% set riverLevelExplanation = "Normal range: " ~ location.riverLevel.normalRange ~ ". " ~ (location.riverLevel.status | capitalize) ~ " levels can affect safety near the bank." %}
+        {{ waterIndicator(
+          "River level",
+          location.riverLevel.value,
+          location.riverLevel.unit,
+          location.riverLevel.status,
+          riverLevelExplanation,
+          location.riverLevel.trend
+        ) }}
+        {% endif %}
+
+        {% if location.flow %}
+        {{ waterIndicator(
+          "River flow",
+          location.flow.value,
+          location.flow.unit,
+          location.flow.status,
+          "How fast water is moving. High flow after rain is common but can carry more sediment and pollutants.",
+          location.flow.trend
+        ) }}
+        {% endif %}
+
+        {{ waterIndicator(
+          "Water temperature",
+          location.waterTemperature.value,
+          location.waterTemperature.unit,
+          null,
+          "Warmer water can encourage algae growth.",
+          location.waterTemperature.trend
+        ) }}
+      </div>
+
+      <details class="govuk-details govuk-!-margin-top-4">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">Water chemistry readings</span>
+        </summary>
+        <div class="govuk-details__text">
+          <table class="govuk-table govuk-table--small-text-until-tablet">
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Indicator</th>
+                <th scope="col" class="govuk-table__header">Value</th>
+                <th scope="col" class="govuk-table__header">Status</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              {% for reading in chemistryRows %}
+              <tr class="govuk-table__row">
+                <th scope="row" class="govuk-table__header">{{ reading.label }}</th>
+                <td class="govuk-table__cell">{{ reading.value }} {{ reading.unit }}</td>
+                <td class="govuk-table__cell">{{ reading.status }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <p class="govuk-body-s"><a class="govuk-link" href="/understanding-water-quality#indicators">What do these indicators mean?</a></p>
+        </div>
+      </details>
+    </section>
+
+    {% if location.bathingWaterWarning %}
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="bathing-heading">
+      <h2 class="govuk-heading-m" id="bathing-heading">Bathing water information</h2>
+      <div class="govuk-inset-text">
+        <p class="govuk-body"><strong>Season classification:</strong> {{ location.bathingWaterWarning.seasonClassification }}</p>
+        <p class="govuk-body">{{ location.bathingWaterWarning.advisory }}</p>
+        <p class="govuk-body-s"><a class="govuk-link" href="{{ location.bathingWaterWarning.swimfoUrl }}" rel="noreferrer">View official Swimfo bathing water profile</a></p>
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="health-heading">
+      <h2 class="govuk-heading-m" id="health-heading">Health advice</h2>
+      <p class="govuk-body">{{ location.healthAdvice }}</p>
+      {% if location.healthWarning.active %}
+      <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+          <span class="govuk-visually-hidden">Warning</span>
+          {{ location.healthWarning.description }}
+        </strong>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="timeline-heading">
+      <h2 class="govuk-heading-m" id="timeline-heading">Recent events</h2>
+      {{ timeline(timelineEvents) }}
+    </section>
+
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="trend-heading">
+      <h2 class="govuk-heading-m" id="trend-heading">Historical trend</h2>
+      <div class="wis-trend-placeholder govuk-inset-text">
+        <p class="govuk-body"><strong>Chart placeholder</strong></p>
+        <p class="govuk-body-s">A future version would show trends in bacteria levels, river flow and rainfall over weeks and months. This would connect to Environment Agency historical data APIs.</p>
+      </div>
+    </section>
+
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="sources-heading">
+      <h2 class="govuk-heading-m" id="sources-heading">Data sources</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for source in location.dataSources %}
+        <li><a class="govuk-link" href="{{ source.url }}" rel="noreferrer">{{ source.name }}</a></li>
+        {% endfor %}
+      </ul>
+      <p class="govuk-body-s">Last updated: {{ location.lastUpdated | formatDate }}</p>
+      <p class="govuk-body-s">Future API integration: {{ location.futureApiSource }}</p>
+    </section>
+
+    {% if nearbyLocations.length > 0 %}
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="nearby-heading">
+      <h2 class="govuk-heading-m" id="nearby-heading">Related nearby locations</h2>
+      <div class="wis-location-grid">
+        {% for nearby in nearbyLocations %}
+        {{ locationSummary(nearby) }}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <div class="govuk-button-group">
+      {{ govukButton({ text: "Ask a question about this location", href: "/ask?postcode=" + postcode + "&location=" + location.id, classes: "govuk-button--secondary" }) }}
+      {{ govukButton({ text: "Back to overview", href: "/overview?postcode=" + postcode, classes: "govuk-button--secondary" }) }}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
