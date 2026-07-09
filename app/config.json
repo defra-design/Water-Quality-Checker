@@ -4,6 +4,7 @@
   "plugins": {
     "govuk-frontend": {
       "rebrand": true
-    }
+    },
+    "@defra/interactive-map": {}
   }
 }

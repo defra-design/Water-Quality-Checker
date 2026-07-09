@@ -72,6 +72,54 @@ function buildTimelineEvents (location) {
   return events
 }
 
+function getMarkerColor (status) {
+  const colors = {
+    good: '#00703c',
+    caution: '#f47738',
+    poor: '#d4351c'
+  }
+  return colors[status] || '#1d70b8'
+}
+
+function buildMapConfig (locations, postcode, areaName) {
+  const lngs = locations.map(l => l.coordinates.lng)
+  const lats = locations.map(l => l.coordinates.lat)
+  const padding = 0.06
+
+  return {
+    mapLabel: `Water locations near ${postcode}`,
+    pageTitle: areaName,
+    bounds: [
+      Math.min(...lngs) - padding,
+      Math.min(...lats) - padding,
+      Math.max(...lngs) + padding,
+      Math.max(...lats) + padding
+    ],
+    center: [
+      lngs.reduce((a, b) => a + b, 0) / lngs.length,
+      lats.reduce((a, b) => a + b, 0) / lats.length
+    ],
+    postcode,
+    locations: locations.map(location => ({
+      id: location.id,
+      name: location.name,
+      coords: [location.coordinates.lng, location.coordinates.lat],
+      status: location.overallStatus,
+      statusLabel: location.statusLabel,
+      waterbodyTypeLabel: location.waterbodyTypeLabel,
+      summary: location.confidenceSummary,
+      url: `/location/${location.id}?postcode=${encodeURIComponent(postcode)}`,
+      markerColor: getMarkerColor(location.overallStatus),
+      warnings: [
+        location.recentSewageDischarge.occurred ? 'Recent sewage discharge' : null,
+        location.algaeWarning.active ? 'Algae alert' : null,
+        location.healthWarning.active ? 'Health warning' : null,
+        location.pollutionIncidents.length > 0 ? 'Pollution incident' : null
+      ].filter(Boolean)
+    }))
+  }
+}
+
 function buildMapTableRows (locations, postcode) {
   return locations.map(location => [
     { html: `<a class="govuk-link" href="/location/${location.id}?postcode=${encodeURIComponent(postcode)}">${location.name}</a>` },
@@ -139,11 +187,13 @@ router.get('/map', (req, res) => {
 
   const normalised = waterService.normalisePostcode(postcode)
   const locations = waterService.getLocationsByPostcode(normalised).map(loc => enrichLocation(loc, normalised))
+  const area = waterService.getAreaForPostcode(normalised)
 
   res.render('map', {
     postcode: normalised,
     locations,
-    tableRows: buildMapTableRows(locations, normalised)
+    tableRows: buildMapTableRows(locations, normalised),
+    mapConfig: buildMapConfig(locations, normalised, area.area)
   })
 })
 

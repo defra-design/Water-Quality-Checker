@@ -7,6 +7,15 @@
 
 {% set pageName="Map and list" %}
 
+{% block head %}
+  {{ super() }}
+  <link href="/plugin-assets/%40defra%2Finteractive-map/dist/css/index.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block bodyStart %}
+  <script>document.body.classList.add('im-is-loading')</script>
+{% endblock %}
+
 {% block content %}
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
@@ -14,26 +23,20 @@
     {{ serviceNavigation("map", postcode) }}
 
     <h1 class="govuk-heading-l">Water locations near {{ postcode }}</h1>
-    <p class="govuk-body">Explore nearby water locations. You can use the map, list or table — all show the same information.</p>
+    <p class="govuk-body">Explore nearby water locations on the map, or use the list or table below — all show the same information.</p>
 
     {{ mapLegend() }}
 
-    <div class="wis-map-container" id="wis-map" role="region" aria-label="Map of nearby water locations">
-      <div class="wis-map-placeholder">
-        <p class="govuk-body"><strong>Interactive map placeholder</strong></p>
-        <p class="govuk-body-s">This prototype is structured for the <a class="govuk-link" href="https://digital.defra.gov.uk/architecture-and-software-development/defra-accessible-maps" rel="noreferrer">Defra Accessible Maps</a> plugin. In production, an accessible map would display location markers here.</p>
-        <ul class="wis-map-placeholder__markers govuk-list">
-          {% for location in locations %}
-          <li>
-            <a class="govuk-link wis-map-marker wis-map-marker--{{ location.overallStatus }}" href="/location/{{ location.id }}?postcode={{ postcode }}" data-location-id="{{ location.id }}">
-              <span class="wis-status-indicator wis-status-indicator--{{ location.overallStatus }}" aria-hidden="true"></span>
-              {{ location.name }} – {{ location.statusLabel }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
+    <div class="wis-map-container">
+      <div id="wis-map" aria-label="Interactive map of nearby water locations"></div>
+      <noscript>
+        <div class="govuk-inset-text">
+          <p class="govuk-body">The interactive map requires JavaScript. Use the list or table view below to browse water locations.</p>
+        </div>
+      </noscript>
     </div>
+
+    <script id="wis-map-data" type="application/json">{{ mapConfig | dump | safe }}</script>
 
     {% set listPanelHtml %}
     <div class="wis-location-grid">
@@ -81,5 +84,8 @@
 {% endblock %}
 
 {% block pageScripts %}
-<script src="/public/javascripts/map.js"></script>
+  <script src="/plugin-assets/%40defra%2Finteractive-map/dist/umd/index.js"></script>
+  <script src="/plugin-assets/%40defra%2Finteractive-map/providers/maplibre/dist/umd/index.js"></script>
+  <script src="/plugin-assets/%40defra%2Finteractive-map/plugins/interact/dist/umd/index.js"></script>
+  <script src="/public/javascripts/map.js"></script>
 {% endblock %}

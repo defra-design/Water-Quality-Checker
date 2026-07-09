@@ -66,7 +66,9 @@ app/
 
 ### Map
 
-The map is a placeholder structured for the [Defra Accessible Maps](https://digital.defra.gov.uk/architecture-and-software-development/defra-accessible-maps) approach. List and table views provide accessible alternatives.
+The map uses the [Defra Interactive Map](https://github.com/DEFRA/interactive-map) (`@defra/interactive-map`) with the MapLibre provider. List and table views provide accessible alternatives.
+
+Registered as a GOV.UK Prototype Kit plugin in `app/config.json`. Marker selection shows a summary panel with a link to the full location page.
 
 ## Design principles
 

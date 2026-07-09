@@ -140,31 +140,16 @@ $wis-border: #b1b4b6;
   }
 }
 
-// Map placeholder – structured for Defra Accessible Maps replacement
+// Map container – Defra Interactive Map renders inside #wis-map
 .wis-map-container {
   margin-bottom: 30px;
 }
 
-.wis-map-placeholder {
-  background: #e8f4ea;
-  border: 2px dashed $wis-good;
-  padding: 20px;
-  min-height: 280px;
-
-  &__markers {
-    margin-top: 15px;
-
-    li {
-      margin-bottom: 10px;
-    }
-  }
+#wis-map {
+  min-height: 200px;
 }
 
-.wis-map-marker {
-  display: inline-flex;
-  align-items: center;
-  font-weight: bold;
-}
+// Legacy placeholder styles removed – map is now provided by @defra/interactive-map
 
 // Map legend
 .wis-map-legend {
