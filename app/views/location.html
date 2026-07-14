@@ -153,13 +153,14 @@
         {% endif %}
 
         {% if location.waterTemperature.value != null %}
-        {% set tempProvenance = "pending" if location.isLiveData else "demo" %}
+        {% set tempProvenance = "live" if location.waterTemperature.isLiveData else ("pending" if location.isLiveData else "demo") %}
+        {% set tempExplanation = ("Sampled " ~ (location.waterTemperature.sampledAt | formatRelativeTime) ~ (" at " ~ location.waterTemperature.stationName if location.waterTemperature.stationName) ~ ". " if location.waterTemperature.isLiveData and location.waterTemperature.sampledAt else "") ~ "Warmer water can encourage algae growth. Very cold or unusually warm water can also make swimming less safe." %}
         {{ waterIndicator(
           "Water temperature",
           location.waterTemperature.value,
           location.waterTemperature.unit,
-          null,
-          "Warmer water can encourage algae growth.",
+          location.waterTemperature.status,
+          tempExplanation,
           location.waterTemperature.trend,
           tempProvenance
         ) }}

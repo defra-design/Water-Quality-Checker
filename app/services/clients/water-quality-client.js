@@ -5,9 +5,9 @@
  * Replaces the legacy Water Quality Archive API (retired December 2025).
  * Unlike Hydrology or Storm Overflow, this is periodic lab sampling, not
  * continuous sensor data — a given site might only be sampled every few
- * weeks. Only a scoped subset of determinands is connected here (pH,
- * ammonia, dissolved oxygen) since the wider chemistry table has ambiguous
- * determinand codes that would need more careful verification.
+ * weeks. Connected here: water temperature (top-level indicator) plus pH,
+ * ammonia and dissolved oxygen (chemistry table). Wider chemistry fields
+ * still have ambiguous determinand codes and need more careful verification.
  *
  * No API key required, but requests must be POST with a bounded date range
  * (max 1 year) unless targeting a single sampling point.
@@ -17,7 +17,7 @@ const { fetchJsonWithRetry, runWithConcurrency, withTimeout } = require('./http-
 
 const BASE_URL = 'https://environment.data.gov.uk/water-quality/data/observation'
 const REQUEST_CONCURRENCY = 4
-const PER_LOCATION_TIMEOUT_MS = 9000
+const PER_LOCATION_TIMEOUT_MS = 15000
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // samples change slowly; cache generously
 const PAGE_LIMIT = 250 // max allowed for JSON-LD
 const SEARCH_RADII_KM = [20, 40]
@@ -33,10 +33,19 @@ const AMBIENT_MATERIAL_TYPES = new Set([
   '2IAZ', '2IBZ', '2ICZ', '2IZZ' // Sea water
 ])
 
-const DETERMINANDS = {
+// Chemistry-table fields only — temperature is fetched with them but mapped
+// onto location.waterTemperature rather than waterChemistry.
+const CHEMISTRY_DETERMINANDS = {
   ph: { code: '0061', label: 'pH', unit: '' },
   ammonia: { code: '0111', label: 'Ammonia', unit: 'mg/L' },
   dissolvedOxygen: { code: '9924', label: 'Dissolved oxygen', unit: 'mg/L' }
+}
+
+const TEMPERATURE_DETERMINAND = { code: '0076', label: 'Water temperature', unit: '°C' }
+
+const ALL_DETERMINANDS = {
+  ...CHEMISTRY_DETERMINANDS,
+  temperature: TEMPERATURE_DETERMINAND
 }
 
 const cache = new Map()
@@ -168,16 +177,26 @@ function dissolvedOxygenStatus (value) {
   return 'good'
 }
 
+function temperatureStatus (value) {
+  if (value == null) return 'unknown'
+  // Rough recreational comfort bands for open-water swimming — not official
+  // water-quality standards. Cold enough to be a risk, or unusually warm.
+  if (value < 10 || value > 25) return 'caution'
+  return 'normal'
+}
+
 const STATUS_FN = {
   ph: phStatus,
   ammonia: ammoniaStatus,
-  dissolvedOxygen: dissolvedOxygenStatus
+  dissolvedOxygen: dissolvedOxygenStatus,
+  temperature: temperatureStatus
 }
 
 /**
- * Fetch pH, ammonia and dissolved oxygen for a coordinate, from the nearest
- * recent ambient (river/lake/estuarine/coastal) sample of each. Bounded by
- * a timeout so a slow/sparse-data area can never hold up the page.
+ * Fetch pH, ammonia, dissolved oxygen and water temperature for a coordinate,
+ * from the nearest recent ambient (river/lake/estuarine/coastal) sample of
+ * each. Bounded by a timeout so a slow/sparse-data area can never hold up
+ * the page.
  */
 async function getWaterChemistry (lat, lng) {
   const rlat = roundCoord(lat)
@@ -186,7 +205,7 @@ async function getWaterChemistry (lat, lng) {
   const cached = getCached(cacheKey)
   if (cached !== undefined) return cached
 
-  const pending = runWithConcurrency(Object.entries(DETERMINANDS), REQUEST_CONCURRENCY, async ([key, det]) => {
+  const pending = runWithConcurrency(Object.entries(ALL_DETERMINANDS), REQUEST_CONCURRENCY, async ([key, det]) => {
     const reading = await findLatestReading(det.code, rlat, rlng)
     if (!reading) return [key, null]
     return [key, {
@@ -207,10 +226,10 @@ async function getWaterChemistry (lat, lng) {
 }
 
 /**
- * Enrich a single location's waterChemistry with pH, ammonia and dissolved
- * oxygen readings. Only intended for the location detail page — like river
- * level/flow, this is periodic lab data rather than something worth
- * fetching for every location in a bulk overview list.
+ * Enrich locations with chemistry-table readings and water temperature.
+ * Only intended for the location detail page — like river level/flow, this
+ * is periodic lab data rather than something worth fetching for every
+ * location in a bulk overview list.
  */
 async function enrichLocationsWithWaterChemistry (locations) {
   if (!locations.length) return locations
@@ -230,17 +249,33 @@ async function enrichLocationsWithWaterChemistry (locations) {
 
     const updatedChemistry = { ...location.waterChemistry }
     let anyLive = false
-    for (const key of Object.keys(DETERMINANDS)) {
+    for (const key of Object.keys(CHEMISTRY_DETERMINANDS)) {
       if (chemistry[key]) {
         updatedChemistry[key] = chemistry[key]
         anyLive = true
       }
     }
+
+    let waterTemperature = location.waterTemperature
+    if (chemistry.temperature) {
+      waterTemperature = {
+        value: chemistry.temperature.value,
+        unit: chemistry.temperature.unit,
+        trend: null,
+        status: chemistry.temperature.status,
+        stationName: chemistry.temperature.stationName,
+        sampledAt: chemistry.temperature.sampledAt,
+        isLiveData: true
+      }
+      anyLive = true
+    }
+
     if (!anyLive) return location
 
     return {
       ...location,
       waterChemistry: updatedChemistry,
+      waterTemperature,
       dataSources: [
         ...location.dataSources.filter(s => !s.name.includes('Water Quality Archive')),
         { name: 'EA Water Quality Archive', url: 'https://environment.data.gov.uk/water-quality/' }

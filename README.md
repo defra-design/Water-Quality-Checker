@@ -80,7 +80,7 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 | Map basemap | **Live** (when OS key set) | `app/services/clients/os-maps-client.js` |
 | River level / flow | **Live** (location detail page only) | `app/services/clients/hydrology-client.js` |
 | Sewage discharges | **Live** (8 of 9 water companies; not Southern Water) | `app/services/clients/storm-overflow-client.js` |
-| Water temperature | Not connected | — |
+| Water temperature | **Live** (location detail page only) | `app/services/clients/water-quality-client.js` (determinand 0076) |
 | Chemistry (pH, ammonia, dissolved oxygen) | **Live** (location detail page only) | `app/services/clients/water-quality-client.js` |
 | Chemistry (nitrate, phosphate, turbidity, conductivity, chlorophyll) | Not connected | — |
 | Industrial pollution / pollution incidents | **Live** (designated bathing waters) | `app/services/clients/pollution-incident-client.js` |
@@ -94,9 +94,9 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 
 Aligned with the “would I feel confident today?” journey for bathing waters:
 
-1. ~~**EA Hydrology + Flood Monitoring** — river level, flow at nearest stations~~ — done (location detail page); water temperature still not connected
+1. ~~**EA Hydrology + Flood Monitoring** — river level, flow at nearest stations~~ — done (location detail page)
 2. ~~**Storm Overflow Hub / EDM** — recent sewage discharges on overview and location pages~~ — done; covers 8 of 9 water companies (see below)
-3. **EA Water Quality** — chemistry table — pH, ammonia and dissolved oxygen done (location detail page); nitrate, phosphate, turbidity, conductivity and chlorophyll still not connected (ambiguous determinand codes need more care)
+3. **EA Water Quality** — water temperature plus chemistry table (pH, ammonia, dissolved oxygen) done on the location detail page; nitrate, phosphate, turbidity, conductivity and chlorophyll still not connected (ambiguous determinand codes need more care)
 4. ~~**Pollution incidents** — bathing-water open/recent incidents~~ — done; national NIRS Category 1/2 quarterly dump left for a later phase
 5. **Algae / ecology** — harmful algae incidents partially covered via #4; broader ecology signals still not connected
 
@@ -126,9 +126,9 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 - Each outfall reports `Start` (currently discharging), `Stop`, or `Offline` (monitor not reporting); a discharge also counts as "recent" if it stopped within the last 48 hours
 - Only outfalls within 5km of a location are matched; beyond that it's reported as no nearby monitored outfall rather than guessing
 
-**EA Water Quality Archive** (`https://environment.data.gov.uk/water-quality/`) — pH, ammonia and dissolved oxygen on the location detail page's chemistry table:
+**EA Water Quality Archive** (`https://environment.data.gov.uk/water-quality/`) — water temperature (top-level indicator) plus pH, ammonia and dissolved oxygen on the location detail page:
 
-- The EA replaced this API entirely in December 2025. The new one requires POST requests, a bounded date range (max 1 year per radius search), and only returns a determinand code rather than a friendly name — several chemistry fields (nitrate, phosphate, turbidity, conductivity, chlorophyll) have multiple ambiguous candidate codes, so only the three with an unambiguous, well-known code are connected for now
+- The EA replaced this API entirely in December 2025. The new one requires POST requests, a bounded date range (max 1 year per radius search), and only returns a determinand code rather than a friendly name — several chemistry fields (nitrate, phosphate, turbidity, conductivity, chlorophyll) have multiple ambiguous candidate codes, so only unambiguous well-known codes are connected for now (temperature `0076`, pH `0061`, ammonia `0111`, dissolved oxygen `9924`)
 - This is **periodic lab sampling, not live sensor data** — a site might only be sampled every few weeks. The UI shows how long ago the sample was taken so this isn't mistaken for a real-time reading
 - A plain radius search returns mostly sewage treatment works effluent monitoring (which would badly mislabel a river as polluted using discharge-point values) — results are filtered to ambient sample types only (river, pond/lake/reservoir, estuarine, sea water)
 - Searches a recent 90-day window first, widening to the full permitted year and then the year before if nothing turns up nearby
@@ -146,7 +146,7 @@ app/services/clients/postcode-client.js        # UK postcode → lat/lng + grid 
 app/services/clients/bathing-water-client.js   # EA Bathing Water API client with 15-min cache
 app/services/clients/hydrology-client.js       # EA Flood Monitoring API client with 15-min cache
 app/services/clients/storm-overflow-client.js  # National Storm Overflow Hub client (8 water company feeds) with 10-min cache
-app/services/clients/water-quality-client.js   # EA Water Quality Archive client (pH, ammonia, dissolved oxygen) with 6-hour cache
+app/services/clients/water-quality-client.js   # EA Water Quality Archive client (temperature, pH, ammonia, dissolved oxygen) with 6-hour cache
 app/services/clients/pollution-incident-client.js  # EA Bathing Water pollution incidents (open + recent) with 15-min cache
 app/services/clients/http-utils.js             # Shared retry-with-backoff and concurrency limiting
 app/services/mappers/bathing-water-mapper.js   # API → location model
