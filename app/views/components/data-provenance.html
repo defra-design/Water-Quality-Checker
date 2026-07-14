@@ -27,11 +27,11 @@
 </div>
 {% endmacro %}
 
-{% macro provenanceBannerLive(isMetOfficeConnected, mentionRiverData, mentionSewageData, mentionChemistryData) %}
+{% macro provenanceBannerLive(isMetOfficeConnected, mentionRiverData, mentionSewageData, mentionChemistryData, mentionPollutionData) %}
 <div class="govuk-inset-text wis-provenance-banner wis-provenance-banner--live">
   <p class="govuk-body govuk-!-margin-bottom-0">
     <strong>Live data in this view:</strong>
-    bathing water from the Environment Agency{% if isMetOfficeConnected %}; rainfall from the Met Office when shown{% endif %}{% if mentionSewageData %}; storm overflow discharges from Water UK's National Storm Overflow Hub when shown{% endif %}{% if mentionRiverData %}; river level/flow from EA Flood Monitoring when shown{% endif %}{% if mentionChemistryData %}; pH, ammonia and dissolved oxygen from the EA Water Quality Archive when shown (periodic lab samples, not continuous readings){% endif %}.
+    bathing water from the Environment Agency{% if isMetOfficeConnected %}; rainfall from the Met Office when shown{% endif %}{% if mentionSewageData %}; storm overflow discharges from Water UK's National Storm Overflow Hub when shown{% endif %}{% if mentionPollutionData %}; pollution incidents (and harmful algae where recorded) from the EA Bathing Water API when shown{% endif %}{% if mentionRiverData %}; river level/flow from EA Flood Monitoring when shown{% endif %}{% if mentionChemistryData %}; pH, ammonia and dissolved oxygen from the EA Water Quality Archive when shown (periodic lab samples, not continuous readings){% endif %}.
     Other indicators may still be demonstration data or not yet connected — see labels on each section.
   </p>
 </div>

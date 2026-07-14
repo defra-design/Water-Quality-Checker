@@ -14,6 +14,7 @@ const metOfficeClient = require('./clients/met-office-client')
 const hydrologyClient = require('./clients/hydrology-client')
 const stormOverflowClient = require('./clients/storm-overflow-client')
 const waterQualityClient = require('./clients/water-quality-client')
+const pollutionIncidentClient = require('./clients/pollution-incident-client')
 const { mapBathingWaterToLocation } = require('./mappers/bathing-water-mapper')
 
 const POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i
@@ -178,8 +179,10 @@ async function getLocationsByPostcode (postcode) {
   bathingLocations = assignNearbyIds(bathingLocations)
   bathingLocations = await metOfficeClient.enrichLocationsWithRainfall(bathingLocations)
   bathingLocations = await stormOverflowClient.enrichLocationsWithStormOverflows(bathingLocations)
-  // River level/flow is only shown on the single location detail page, so it's
-  // fetched lazily in getLocationById rather than for every nearby location here.
+  bathingLocations = await pollutionIncidentClient.enrichLocationsWithPollutionIncidents(bathingLocations)
+  // River level/flow and water chemistry are only shown on the single location
+  // detail page, so they're fetched lazily in getLocationById rather than for
+  // every nearby location here.
   bathingLocations = bathingLocations.map(loc => ({
     ...loc,
     postcode: normalised
@@ -196,6 +199,7 @@ async function getLocationById (id) {
     let location = mapBathingWaterToLocation(record)
     let enriched = await metOfficeClient.enrichLocationsWithRainfall([location])
     enriched = await stormOverflowClient.enrichLocationsWithStormOverflows(enriched)
+    enriched = await pollutionIncidentClient.enrichLocationsWithPollutionIncidents(enriched)
     enriched = await hydrologyClient.enrichLocationsWithRiverConditions(enriched)
     enriched = await waterQualityClient.enrichLocationsWithWaterChemistry(enriched)
     return enriched[0]
@@ -230,6 +234,9 @@ async function getOverviewForPostcode (postcode) {
   const sewageDischarges = nearbyLocations.filter(l => l.recentSewageDischarge?.occurred)
   const algaeAlerts = nearbyLocations.filter(l => l.algaeWarning?.active)
   const pollutionIncidents = nearbyLocations.filter(l => l.pollutionIncidents?.length > 0)
+  const openPollutionIncidents = nearbyLocations.filter(l =>
+    l.pollutionIncidents?.some(incident => incident.status === 'open')
+  )
   const healthWarnings = nearbyLocations.filter(l => l.healthWarning?.active)
 
   const rainfallReadings = nearbyLocations
@@ -241,6 +248,7 @@ async function getOverviewForPostcode (postcode) {
 
   const isLiveData = nearbyLocations.some(l => l.isLiveData)
   const isSewageLiveData = nearbyLocations.some(l => l.recentSewageDischarge?.isLiveData)
+  const isPollutionLiveData = nearbyLocations.some(l => l.isPollutionLiveData)
 
   return {
     postcode: normalisePostcode(postcode),
@@ -252,6 +260,7 @@ async function getOverviewForPostcode (postcode) {
     isApproximateArea: area.isApproximate || false,
     isLiveData,
     isSewageLiveData,
+    isPollutionLiveData,
     isMetOfficeConnected: metOfficeClient.isConfigured(),
     overallConfidence,
     statusCounts,
@@ -263,6 +272,7 @@ async function getOverviewForPostcode (postcode) {
     sewageDischarges,
     algaeAlerts,
     pollutionIncidents,
+    openPollutionIncidents,
     healthWarnings,
     avgRainfall,
     summary: buildOverviewSummary(overallConfidence, sewageDischarges, algaeAlerts, pollutionIncidents, avgRainfall, isLiveData, nearbyLocations.length)

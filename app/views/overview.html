@@ -21,7 +21,7 @@
     {{ provenanceLegend() }}
 
     {% if overview.isLiveData %}
-    {{ provenanceBannerLive(overview.isMetOfficeConnected, false, overview.isSewageLiveData) }}
+    {{ provenanceBannerLive(overview.isMetOfficeConnected, false, overview.isSewageLiveData, false, overview.isPollutionLiveData) }}
     {% else %}
     {{ provenanceBannerDemo() }}
     {% endif %}
@@ -44,11 +44,14 @@
       {{ govukButton({ text: "Ask a question", href: "/ask?postcode=" + overview.postcode, classes: "govuk-button--secondary" }) }}
     </div>
 
-    {% if overview.healthWarnings.length > 0 or overview.sewageDischarges.length > 0 or overview.algaeAlerts.length > 0 %}
+    {% if overview.healthWarnings.length > 0 or overview.sewageDischarges.length > 0 or overview.algaeAlerts.length > 0 or overview.openPollutionIncidents.length > 0 %}
     <section class="govuk-!-margin-bottom-8" aria-labelledby="warnings-heading">
       <h2 class="govuk-heading-m" id="warnings-heading">Active warnings in your area</h2>
       {% if overview.sewageDischarges.length > 0 %}
       {{ warningPanel("Recent sewage discharges reported", ["Check individual locations before swimming. Wait at least 48 hours after a discharge before full immersion."], "sewage") }}
+      {% endif %}
+      {% if overview.openPollutionIncidents.length > 0 %}
+      {{ warningPanel("Open pollution incidents", ["An open pollution incident is recorded at one or more nearby bathing waters. Check the location pages and Swimfo before entering the water."], "pollution") }}
       {% endif %}
       {% if overview.algaeAlerts.length > 0 %}
       {{ warningPanel("Algae alerts active", ["Keep dogs away from affected water. Do not enter areas with visible scum."], "algae") }}

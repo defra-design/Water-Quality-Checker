@@ -28,6 +28,9 @@ function getOverviewFactorProvenance (overview, factor) {
   if (factor === 'sewage') {
     return overview.isSewageLiveData ? 'live' : 'pending'
   }
+  if (factor === 'pollution' || factor === 'algae') {
+    return overview.isPollutionLiveData ? 'live' : 'pending'
+  }
   return 'pending'
 }
 

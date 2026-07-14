@@ -22,7 +22,7 @@
     {{ provenanceLegend() }}
 
     {% if location.isLiveData %}
-    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true, location.recentSewageDischarge.isLiveData, location.waterChemistry.ph.isLiveData) }}
+    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true, location.recentSewageDischarge.isLiveData, location.waterChemistry.ph.isLiveData, location.isPollutionLiveData) }}
     <p class="govuk-body">
       {{ provenanceTag('live') }}
       {% if location.recentRainfall.isLiveData %}

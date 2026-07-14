@@ -227,12 +227,14 @@ router.get('/map', async (req, res, next) => {
     const area = await waterService.getAreaForPostcode(normalised)
     const isLiveData = locations.some(loc => loc.isLiveData)
     const isSewageLiveData = locations.some(loc => loc.recentSewageDischarge?.isLiveData)
+    const isPollutionLiveData = locations.some(loc => loc.isPollutionLiveData)
 
     res.render('map', {
       postcode: normalised,
       locations,
       isLiveData,
       isSewageLiveData,
+      isPollutionLiveData,
       isMockData: !isLiveData,
       isMetOfficeConnected: metOfficeClient.isConfigured(),
       isOsMapsConnected: osMapsClient.isConfigured(),

@@ -83,8 +83,8 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 | Water temperature | Not connected | — |
 | Chemistry (pH, ammonia, dissolved oxygen) | **Live** (location detail page only) | `app/services/clients/water-quality-client.js` |
 | Chemistry (nitrate, phosphate, turbidity, conductivity, chlorophyll) | Not connected | — |
-| Industrial pollution | Not connected | Mock on Berkshire demo only |
-| Algal blooms | Not connected | — |
+| Industrial pollution / pollution incidents | **Live** (designated bathing waters) | `app/services/clients/pollution-incident-client.js` |
+| Algal blooms | **Partial** (harmful algae incidents from bathing-water API) | `app/services/clients/pollution-incident-client.js` |
 | Ecological health | Not connected | — |
 | Drinking water / household | Not in scope | — |
 
@@ -97,8 +97,8 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 1. ~~**EA Hydrology + Flood Monitoring** — river level, flow at nearest stations~~ — done (location detail page); water temperature still not connected
 2. ~~**Storm Overflow Hub / EDM** — recent sewage discharges on overview and location pages~~ — done; covers 8 of 9 water companies (see below)
 3. **EA Water Quality** — chemistry table — pH, ammonia and dissolved oxygen done (location detail page); nitrate, phosphate, turbidity, conductivity and chlorophyll still not connected (ambiguous determinand codes need more care)
-4. **Pollution incidents** — industrial and environmental incident reports (curated where no clean API)
-5. **Algae / ecology** — seasonal and indicator-based signals
+4. ~~**Pollution incidents** — bathing-water open/recent incidents~~ — done; national NIRS Category 1/2 quarterly dump left for a later phase
+5. **Algae / ecology** — harmful algae incidents partially covered via #4; broader ecology signals still not connected
 
 ### Connected APIs
 
@@ -134,12 +134,20 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 - Searches a recent 90-day window first, widening to the full permitted year and then the year before if nothing turns up nearby
 - Only fetched for the single location detail page, same reasoning as river level/flow
 
+**EA Bathing Water pollution incidents** — open and recently closed incidents at designated bathing waters, on overview and location pages:
+
+- Same Bathing Water API platform we already use for classifications and samples (`/doc/bathing-water-quality/pollution-incident`)
+- Includes sewage, oil/fuel, chemicals, abnormal rainfall, dredging, decaying marine life, and **harmful algae** — open algae incidents also drive the algae warning on location cards
+- Shows open incidents plus closed ones from the last 90 days; open incidents raise the location status and surface as health warnings
+- This is **not** the national NIRS Category 1/2 quarterly ZIP dataset (serious incidents nationwide with lag) — that remains a possible later enrichment for seasonal context
+
 ```
 app/services/clients/postcode-client.js        # UK postcode → lat/lng + grid ref
 app/services/clients/bathing-water-client.js   # EA Bathing Water API client with 15-min cache
 app/services/clients/hydrology-client.js       # EA Flood Monitoring API client with 15-min cache
 app/services/clients/storm-overflow-client.js  # National Storm Overflow Hub client (8 water company feeds) with 10-min cache
 app/services/clients/water-quality-client.js   # EA Water Quality Archive client (pH, ammonia, dissolved oxygen) with 6-hour cache
+app/services/clients/pollution-incident-client.js  # EA Bathing Water pollution incidents (open + recent) with 15-min cache
 app/services/clients/http-utils.js             # Shared retry-with-backoff and concurrency limiting
 app/services/mappers/bathing-water-mapper.js   # API → location model
 ```
