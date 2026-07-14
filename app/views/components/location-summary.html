@@ -8,7 +8,7 @@
 {% macro locationSummary(location) %}
 <div class="wis-location-summary wis-location-summary--{{ location.overallStatus }}">
   <div class="wis-location-summary__header">
-    <span class="wis-location-summary__type">{{ location.waterbodyTypeLabel }}</span>
+    <span class="wis-location-summary__type">{{ location.waterbodyTypeLabel }}{% if location.siteKindLabel and location.limitedEvidence %} · {{ location.siteKindLabel }}{% endif %}</span>
     <span class="wis-location-summary__status">
       {% if location.isLiveData %}
       {{ provenanceTag('live') }}
@@ -27,6 +27,9 @@
   <p class="govuk-body-s govuk-!-margin-bottom-2">{{ location.location }}</p>
   <p class="govuk-body-s">{{ location.confidenceSummary | truncate(120) }}</p>
   <ul class="govuk-list wis-location-summary__tags">
+    {% if location.limitedEvidence %}
+    <li><strong class="govuk-tag govuk-tag--grey">Limited water quality evidence</strong></li>
+    {% endif %}
     {% if location.recentSewageDischarge.occurred %}
     <li><strong class="govuk-tag govuk-tag--red">Sewage discharge</strong></li>
     {% endif %}

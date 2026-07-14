@@ -21,7 +21,7 @@
     {{ provenanceLegend() }}
 
     {% if overview.isLiveData %}
-    {{ provenanceBannerLive(overview.isMetOfficeConnected, false, overview.isSewageLiveData, false, overview.isPollutionLiveData) }}
+    {{ provenanceBannerLive(overview.isMetOfficeConnected, false, overview.isSewageLiveData, false, overview.isPollutionLiveData, overview.hasDiscoverySites) }}
     {% else %}
     {{ provenanceBannerDemo() }}
     {% endif %}
@@ -136,6 +136,31 @@
       </div>
     </section>
 
+    {% if overview.bathingWaters.length > 0 %}
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="bathing-heading">
+      <h2 class="govuk-heading-m" id="bathing-heading">Designated bathing waters ({{ overview.bathingWaters.length }})</h2>
+      <p class="govuk-body-s">Official bathing water classifications are based on samples from last season. Today's conditions may differ — especially after rainfall.</p>
+      <div class="wis-location-grid">
+        {% for location in overview.bathingWaters %}
+        {{ locationSummary(location) }}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if overview.recreationSites.length > 0 %}
+    <section class="govuk-!-margin-bottom-8" aria-labelledby="recreation-heading">
+      <h2 class="govuk-heading-m" id="recreation-heading">Reported recreation sites ({{ overview.recreationSites.length }})</h2>
+      <p class="govuk-body-s">Places where recreation was recorded in an Environment Agency research dataset. These are not designated bathing waters and usually have limited official swimming monitoring.</p>
+      <div class="wis-location-grid">
+        {% for location in overview.recreationSites %}
+        {{ locationSummary(location) }}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if overview.rivers.length > 0 %}
     <section class="govuk-!-margin-bottom-8" aria-labelledby="rivers-heading">
       <h2 class="govuk-heading-m" id="rivers-heading">Rivers ({{ overview.rivers.length }})</h2>
       <p class="govuk-body-s">River level and flow affect safety and water clarity. High flow after rain is normal but can temporarily reduce water quality.</p>
@@ -145,6 +170,7 @@
         {% endfor %}
       </div>
     </section>
+    {% endif %}
 
     {% if overview.lakes.length > 0 %}
     <section class="govuk-!-margin-bottom-8" aria-labelledby="lakes-heading">
@@ -161,21 +187,9 @@
     {% if overview.reservoirs.length > 0 %}
     <section class="govuk-!-margin-bottom-8" aria-labelledby="reservoirs-heading">
       <h2 class="govuk-heading-m" id="reservoirs-heading">Reservoirs ({{ overview.reservoirs.length }})</h2>
-      <p class="govuk-body-s">Many reservoirs are managed for water supply. Public access and activities vary.</p>
+      <p class="govuk-body-s">Includes Canal & River Trust reservoirs where nearby. Many reservoirs are managed for water supply — public access and swimming rules vary, and most are not designated bathing waters.</p>
       <div class="wis-location-grid">
         {% for location in overview.reservoirs %}
-        {{ locationSummary(location) }}
-        {% endfor %}
-      </div>
-    </section>
-    {% endif %}
-
-    {% if overview.bathingWaters.length > 0 %}
-    <section class="govuk-!-margin-bottom-8" aria-labelledby="bathing-heading">
-      <h2 class="govuk-heading-m" id="bathing-heading">Designated bathing waters ({{ overview.bathingWaters.length }})</h2>
-      <p class="govuk-body-s">Official bathing water classifications are based on samples from last season. Today's conditions may differ — especially after rainfall.</p>
-      <div class="wis-location-grid">
-        {% for location in overview.bathingWaters %}
         {{ locationSummary(location) }}
         {% endfor %}
       </div>
@@ -188,9 +202,9 @@
       </summary>
       <div class="govuk-details__text">
         {% if overview.isLiveData %}
-        <p class="govuk-body">Designated bathing waters are loaded live from the Environment Agency for any valid UK postcode. Rainfall uses the Met Office Weather DataHub when configured. Other indicators are not yet connected and are labelled accordingly.</p>
+        <p class="govuk-body">Designated bathing waters come from the Environment Agency Bathing Water API. Extra places come from the EA water recreation research layer and Canal & River Trust open reservoir data. Rainfall uses the Met Office Weather DataHub when configured. Other indicators are labelled Live, Not connected or similar.</p>
         {% else %}
-        <p class="govuk-body">No designated bathing waters were found near this postcode, or the postcode could not be resolved. Try a full UK postcode (for example BH1 3AA, TR7 1PP, or RG4 8BY).</p>
+        <p class="govuk-body">No water locations were found near this postcode, or the postcode could not be resolved. Try a full UK postcode (for example BH1 3AA, TR7 1PP, or RG4 8BY).</p>
         {% endif %}
       </div>
     </details>

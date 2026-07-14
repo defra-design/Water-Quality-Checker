@@ -29,13 +29,14 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Example postcodes
 
-Any valid UK postcode resolves to the nearest designated bathing waters from the Environment Agency. Try:
+Any valid UK postcode resolves to nearby designated bathing waters, plus reported recreation sites and Canal & River Trust reservoirs where available. Try:
 
-- `BH1 3AA` – Bournemouth (coastal)
+- `BH1 3AA` – Bournemouth (coastal bathing + recreation)
 - `TR7 1PP` – Newquay, Cornwall (coastal)
 - `NE33 2LD` – South Shields (coastal)
 - `YO11 1AA` – Scarborough (coastal)
-- `RG4 8BY` – Reading (inland river bathing waters)
+- `RG4 8BY` – Reading (inland river bathing waters + recreation)
+- `BL8 2NZ` – Bury area (CRT reservoirs such as Elton nearby)
 
 Legacy demonstration locations (illustrative scenario data) remain available by direct URL, for example `/location/river-thames-caversham`.
 
@@ -83,12 +84,14 @@ The UI labels each indicator as **Live data**, **Demonstration data**, **Not con
 | Water temperature | **Live** (location detail page only) | `app/services/clients/water-quality-client.js` (determinand 0076) |
 | Chemistry (pH, ammonia, dissolved oxygen) | **Live** (location detail page only) | `app/services/clients/water-quality-client.js` |
 | Chemistry (nitrate, phosphate, turbidity, conductivity, chlorophyll) | Not connected | — |
+| Reported recreation sites | **Live** (discovery; limited bathing evidence) | `app/services/clients/recreation-locations-client.js` |
+| CRT reservoirs | **Live** (asset register; limited bathing evidence) | `app/services/clients/crt-assets-client.js` |
 | Industrial pollution / pollution incidents | **Live** (designated bathing waters) | `app/services/clients/pollution-incident-client.js` |
 | Algal blooms | **Partial** (harmful algae incidents from bathing-water API) | `app/services/clients/pollution-incident-client.js` |
 | Ecological health | Not connected | — |
 | Drinking water / household | Not in scope | — |
 
-**Nationwide:** Valid UK postcodes are geocoded via [postcodes.io](https://postcodes.io/) and matched to the nearest designated bathing waters via the EA API. Rainfall is enriched from Met Office when configured. Legacy mock data in `app/data/water-locations.json` is only used for direct location URLs (demonstration scenarios).
+**Nationwide:** Valid UK postcodes are geocoded via [postcodes.io](https://postcodes.io/) and matched to the nearest designated bathing waters via the EA API, plus nearby reported recreation sites (EA research layer) and Canal & River Trust reservoirs. Rainfall is enriched from Met Office when configured. Legacy mock data in `app/data/water-locations.json` is only used for direct location URLs (demonstration scenarios).
 
 ### Suggested integration order
 
@@ -99,6 +102,7 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 3. **EA Water Quality** — water temperature plus chemistry table (pH, ammonia, dissolved oxygen) done on the location detail page; nitrate, phosphate, turbidity, conductivity and chlorophyll still not connected (ambiguous determinand codes need more care)
 4. ~~**Pollution incidents** — bathing-water open/recent incidents~~ — done; national NIRS Category 1/2 quarterly dump left for a later phase
 5. **Algae / ecology** — harmful algae incidents partially covered via #4; broader ecology signals still not connected
+6. ~~**More places (non-bathing discovery)** — EA recreation locations + CRT reservoirs~~ — done (labelled limited evidence; not Swimfo-equivalent)
 
 ### Connected APIs
 
@@ -141,6 +145,19 @@ Aligned with the “would I feel confident today?” journey for bathing waters:
 - Shows open incidents plus closed ones from the last 90 days; open incidents raise the location status and surface as health warnings
 - This is **not** the national NIRS Category 1/2 quarterly ZIP dataset (serious incidents nationwide with lag) — that remains a possible later enrichment for seasonal context
 
+**EA Water recreation locations (England)** — expands the map beyond designated bathing waters:
+
+- Research dataset on Defra Data Services Platform (~3,300 aggregated recreation locations from 17 organisations, ~2017–2024)
+- Used for **discovery** of coastal and inland recreation places near a postcode; filtered toward swimming / open-water / recreation-site signals
+- Deduped against designated bathing waters within 250m so Swimfo sites stay the primary card
+- Always labelled **Limited evidence** — not a substitute for bathing-water classifications
+
+**Canal & River Trust reservoirs** — named inland reservoir assets from CRT open data (ArcGIS FeatureServer; Hub lists OGL):
+
+- Nearest reservoirs within ~30km are added as discovery pins
+- Asset register only — swimming may be restricted; no bathing-water microbiology
+- Confirm CRT licence PDF before treating as production policy sign-off
+
 ```
 app/services/clients/postcode-client.js        # UK postcode → lat/lng + grid ref
 app/services/clients/bathing-water-client.js   # EA Bathing Water API client with 15-min cache
@@ -148,8 +165,11 @@ app/services/clients/hydrology-client.js       # EA Flood Monitoring API client 
 app/services/clients/storm-overflow-client.js  # National Storm Overflow Hub client (8 water company feeds) with 10-min cache
 app/services/clients/water-quality-client.js   # EA Water Quality Archive client (temperature, pH, ammonia, dissolved oxygen) with 6-hour cache
 app/services/clients/pollution-incident-client.js  # EA Bathing Water pollution incidents (open + recent) with 15-min cache
+app/services/clients/recreation-locations-client.js # EA recreation research locations (discovery) with 6-hour cache
+app/services/clients/crt-assets-client.js      # Canal & River Trust reservoirs (discovery) with 6-hour cache
 app/services/clients/http-utils.js             # Shared retry-with-backoff and concurrency limiting
 app/services/mappers/bathing-water-mapper.js   # API → location model
+app/services/mappers/discovery-site-mapper.js  # Shared model for limited-evidence discovery sites
 ```
 
 ### Configuring API keys

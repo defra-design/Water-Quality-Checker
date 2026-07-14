@@ -21,6 +21,7 @@ $wis-border: #b1b4b6;
   &--good { background-color: $wis-good; }
   &--caution { background-color: $wis-caution; }
   &--poor { background-color: $wis-poor; }
+  &--unknown { background-color: #505a5f; }
 }
 
 // Status card
@@ -32,6 +33,7 @@ $wis-border: #b1b4b6;
   &--good { border-left-color: $wis-good; border-left-width: 8px; }
   &--caution { border-left-color: $wis-caution; border-left-width: 8px; }
   &--poor { border-left-color: $wis-poor; border-left-width: 8px; }
+  &--unknown { border-left-color: #505a5f; border-left-width: 8px; }
 
   &__tag {
     display: inline-block;

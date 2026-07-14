@@ -214,6 +214,7 @@ function mapBathingWaterToLocation ({ bathingWater, sample }) {
     futureApiSource: 'EA Bathing Water API (live), EA Flood Monitoring (live), Water UK Storm Overflow Hub (live), Met Office Weather DataHub',
     nearbyLocationIds: [],
     isLiveData: true,
+    isDesignatedBathingWater: true,
     dataSource: 'ea-bathing-water-api'
   }
 }

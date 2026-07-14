@@ -16,13 +16,23 @@
 
     {{ serviceNavigation("location", postcode) }}
 
-    <span class="govuk-caption-l">{{ location.waterbodyTypeLabel }} · {{ location.location }}</span>
+    <span class="govuk-caption-l">{{ location.waterbodyTypeLabel }}{% if location.siteKindLabel %} · {{ location.siteKindLabel }}{% endif %} · {{ location.location }}</span>
     <h1 class="govuk-heading-l">{{ location.name }}</h1>
 
     {{ provenanceLegend() }}
 
+    {% if location.limitedEvidence %}
+    <div class="govuk-warning-text">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        This is not an Environment Agency designated bathing water. Official swimming classifications and day-to-day bacteria forecasts may not apply here.
+      </strong>
+    </div>
+    {% endif %}
+
     {% if location.isLiveData %}
-    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true, location.recentSewageDischarge.isLiveData, location.waterChemistry.ph.isLiveData, location.isPollutionLiveData) }}
+    {{ provenanceBannerLive(location.recentRainfall.isLiveData, true, location.recentSewageDischarge.isLiveData, location.waterChemistry.ph.isLiveData, location.isPollutionLiveData, location.siteKind === 'recreation_research' or location.siteKind === 'crt_reservoir') }}
     <p class="govuk-body">
       {{ provenanceTag('live') }}
       {% if location.recentRainfall.isLiveData %}
@@ -79,7 +89,9 @@
           </tr>
         </tbody>
       </table>
-      {% if location.isLiveData %}
+      {% if location.limitedEvidence %}
+      <p class="govuk-body-s">{{ provenanceTag('live') }} Activity advice is cautious by default because this place is not a designated bathing water.</p>
+      {% elif location.isLiveData %}
       <p class="govuk-body-s">{{ provenanceTag('live') }} Activity advice is derived from live bathing water classification.</p>
       {% else %}
       <p class="govuk-body-s">{{ provenanceTag('demo') }} Activity advice is derived from demonstration scenario data.</p>
@@ -202,14 +214,23 @@
       </details>
     </section>
 
-    {% if location.bathingWaterWarning %}
+    {% if location.bathingWaterWarning and location.bathingWaterWarning.active %}
     <section class="govuk-!-margin-bottom-6" aria-labelledby="bathing-heading">
       <h2 class="govuk-heading-m" id="bathing-heading">Bathing water information</h2>
       {% if location.isLiveData %}{{ provenanceTag('live') }}{% else %}{{ provenanceTag('demo') }}{% endif %}
       <div class="govuk-inset-text">
         <p class="govuk-body"><strong>Season classification:</strong> {{ location.bathingWaterWarning.seasonClassification }}</p>
         <p class="govuk-body">{{ location.bathingWaterWarning.advisory }}</p>
+        {% if location.bathingWaterWarning.swimfoUrl %}
         <p class="govuk-body-s"><a class="govuk-link" href="{{ location.bathingWaterWarning.swimfoUrl }}" rel="noreferrer">View official Swimfo bathing water profile</a></p>
+        {% endif %}
+      </div>
+    </section>
+    {% elif location.limitedEvidence %}
+    <section class="govuk-!-margin-bottom-6" aria-labelledby="bathing-heading">
+      <h2 class="govuk-heading-m" id="bathing-heading">Bathing water information</h2>
+      <div class="govuk-inset-text">
+        <p class="govuk-body">{{ location.bathingWaterWarning.advisory if location.bathingWaterWarning else 'Not a designated bathing water. Treat water-quality indicators as limited.' }}</p>
       </div>
     </section>
     {% endif %}

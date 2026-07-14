@@ -2,7 +2,8 @@
  * Water Intelligence Service – data access layer
  *
  * Nationwide: valid UK postcodes resolve to nearest designated bathing waters
- * via postcodes.io + Environment Agency Bathing Water API.
+ * via postcodes.io + Environment Agency Bathing Water API, plus nearby EA
+ * recreation research locations and Canal & River Trust reservoirs.
  * Legacy mock locations remain available by ID for demonstration scenarios.
  */
 
@@ -15,10 +16,15 @@ const hydrologyClient = require('./clients/hydrology-client')
 const stormOverflowClient = require('./clients/storm-overflow-client')
 const waterQualityClient = require('./clients/water-quality-client')
 const pollutionIncidentClient = require('./clients/pollution-incident-client')
+const recreationLocationsClient = require('./clients/recreation-locations-client')
+const crtAssetsClient = require('./clients/crt-assets-client')
 const { mapBathingWaterToLocation } = require('./mappers/bathing-water-mapper')
 
 const POSTCODE_REGEX = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i
 const DEFAULT_NEARBY_COUNT = 20
+const DISCOVERY_DEDUPE_KM = 0.25
+const RECREATION_NEARBY_LIMIT = 12
+const CRT_NEARBY_LIMIT = 8
 
 const liveLocationCache = new Map()
 const LIVE_CACHE_TTL_MS = 10 * 60 * 1000
@@ -142,6 +148,64 @@ async function fetchBathingWatersNearPostcode (postcode, count = DEFAULT_NEARBY_
   return records.map(mapBathingWaterToLocation)
 }
 
+function isNearAny (candidate, existing, maxKm) {
+  return existing.some(other =>
+    haversineKm(
+      candidate.coordinates.lat,
+      candidate.coordinates.lng,
+      other.coordinates.lat,
+      other.coordinates.lng
+    ) <= maxKm
+  )
+}
+
+/**
+ * Drop discovery pins that sit on top of a designated bathing water so the
+ * official site remains the single card for that place.
+ */
+function dedupeDiscoveryAgainstBathingWaters (discoveryLocations, bathingLocations) {
+  return discoveryLocations.filter(loc => !isNearAny(loc, bathingLocations, DISCOVERY_DEDUPE_KM))
+}
+
+async function fetchDiscoveryLocationsNear (centre, bathingLocations) {
+  const [recreation, reservoirs] = await Promise.all([
+    recreationLocationsClient.getRecreationLocationsNear(centre.lat, centre.lng, {
+      limit: RECREATION_NEARBY_LIMIT
+    }),
+    crtAssetsClient.getReservoirsNear(centre.lat, centre.lng, {
+      limit: CRT_NEARBY_LIMIT
+    })
+  ])
+
+  const combined = [...recreation, ...reservoirs]
+  const deduped = dedupeDiscoveryAgainstBathingWaters(combined, bathingLocations)
+  const sorted = sortByDistance(deduped, centre)
+
+  // Cap each discovery source after dedupe so bathing waters stay visible in lists/maps
+  const recreationKept = sorted
+    .filter(l => l.siteKind === 'recreation_research')
+    .slice(0, RECREATION_NEARBY_LIMIT)
+  const reservoirsKept = sorted
+    .filter(l => l.siteKind === 'crt_reservoir')
+    .slice(0, CRT_NEARBY_LIMIT)
+
+  return sortByDistance([...recreationKept, ...reservoirsKept], centre)
+}
+
+async function enrichLocationBundle (locationList) {
+  let enriched = await metOfficeClient.enrichLocationsWithRainfall(locationList)
+  enriched = await stormOverflowClient.enrichLocationsWithStormOverflows(enriched)
+  enriched = await pollutionIncidentClient.enrichLocationsWithPollutionIncidents(enriched)
+  return enriched
+}
+
+async function enrichLocationDetail (location) {
+  let enriched = await enrichLocationBundle([location])
+  enriched = await hydrologyClient.enrichLocationsWithRiverConditions(enriched)
+  enriched = await waterQualityClient.enrichLocationsWithWaterChemistry(enriched)
+  return enriched[0]
+}
+
 function getLiveCache (postcode) {
   const entry = liveLocationCache.get(postcode)
   if (!entry) return null
@@ -173,37 +237,56 @@ async function getLocationsByPostcode (postcode) {
     bathingLocations = await fetchBathingWatersNearPostcode(normalised)
   } catch (err) {
     console.error(`Bathing water lookup failed for ${normalised}:`, err.message)
+    bathingLocations = []
+  }
+
+  let discoveryLocations = []
+  try {
+    discoveryLocations = await fetchDiscoveryLocationsNear(area.centre, bathingLocations)
+  } catch (err) {
+    console.error(`Discovery location lookup failed for ${normalised}:`, err.message)
+    discoveryLocations = []
+  }
+
+  if (!bathingLocations.length && !discoveryLocations.length) {
     return []
   }
-  bathingLocations = sortByDistance(bathingLocations, area.centre)
-  bathingLocations = assignNearbyIds(bathingLocations)
-  bathingLocations = await metOfficeClient.enrichLocationsWithRainfall(bathingLocations)
-  bathingLocations = await stormOverflowClient.enrichLocationsWithStormOverflows(bathingLocations)
-  bathingLocations = await pollutionIncidentClient.enrichLocationsWithPollutionIncidents(bathingLocations)
+
+  let combined = sortByDistance([...bathingLocations, ...discoveryLocations], area.centre)
+  combined = assignNearbyIds(combined)
   // River level/flow and water chemistry are only shown on the single location
   // detail page, so they're fetched lazily in getLocationById rather than for
   // every nearby location here.
-  bathingLocations = bathingLocations.map(loc => ({
+  combined = await enrichLocationBundle(combined)
+  combined = combined.map(loc => ({
     ...loc,
     postcode: normalised
   }))
 
-  setLiveCache(normalised, bathingLocations)
-  return bathingLocations
+  setLiveCache(normalised, combined)
+  return combined
 }
 
 async function getLocationById (id) {
   if (id.startsWith('bathing-water-')) {
     const eubwid = id.replace('bathing-water-', '')
     const record = await bathingWaterClient.getBathingWater(eubwid)
-    let location = mapBathingWaterToLocation(record)
-    let enriched = await metOfficeClient.enrichLocationsWithRainfall([location])
-    enriched = await stormOverflowClient.enrichLocationsWithStormOverflows(enriched)
-    enriched = await pollutionIncidentClient.enrichLocationsWithPollutionIncidents(enriched)
-    enriched = await hydrologyClient.enrichLocationsWithRiverConditions(enriched)
-    enriched = await waterQualityClient.enrichLocationsWithWaterChemistry(enriched)
-    return enriched[0]
+    return enrichLocationDetail(mapBathingWaterToLocation(record))
   }
+
+  if (id.startsWith('recreation-')) {
+    const locationId = id.replace(/^recreation-/, '')
+    const location = await recreationLocationsClient.getRecreationLocationById(locationId)
+    if (!location) return null
+    return enrichLocationDetail(location)
+  }
+
+  if (id.startsWith('crt-reservoir-')) {
+    const location = await crtAssetsClient.getReservoirById(id)
+    if (!location) return null
+    return enrichLocationDetail(location)
+  }
+
   return locations.find(loc => loc.id === id) || null
 }
 
@@ -214,22 +297,33 @@ function getLocationsByIds (ids) {
 async function getOverviewForPostcode (postcode) {
   const area = await getAreaForPostcode(postcode)
   const nearbyLocations = await getLocationsByPostcode(postcode)
+  const designatedBathingWaters = nearbyLocations.filter(l => l.isDesignatedBathingWater !== false && l.waterbodyType === 'bathing water')
+  const recreationSites = nearbyLocations.filter(l => l.siteKind === 'recreation_research')
+  const crtReservoirs = nearbyLocations.filter(l => l.siteKind === 'crt_reservoir')
 
-  const statusCounts = { good: 0, caution: 0, poor: 0 }
-  nearbyLocations.forEach(loc => {
+  const statusCounts = { good: 0, caution: 0, poor: 0, unknown: 0 }
+  // Overview confidence is driven by designated bathing waters only —
+  // discovery sites always have limited evidence and must not dilute that signal.
+  designatedBathingWaters.forEach(loc => {
     if (statusCounts[loc.overallStatus] !== undefined) {
       statusCounts[loc.overallStatus]++
     }
   })
 
   let overallConfidence = 'good'
-  if (statusCounts.poor > 0) overallConfidence = 'poor'
-  else if (statusCounts.caution > 0) overallConfidence = 'caution'
+  if (designatedBathingWaters.length === 0 && nearbyLocations.length > 0) {
+    overallConfidence = 'caution'
+  } else if (statusCounts.poor > 0) {
+    overallConfidence = 'poor'
+  } else if (statusCounts.caution > 0) {
+    overallConfidence = 'caution'
+  }
 
-  const rivers = nearbyLocations.filter(l => l.waterbodyType === 'river')
-  const lakes = nearbyLocations.filter(l => l.waterbodyType === 'lake')
-  const reservoirs = nearbyLocations.filter(l => l.waterbodyType === 'reservoir')
+  const rivers = nearbyLocations.filter(l => l.waterbodyType === 'river' && l.siteKind !== 'recreation_research')
+  const lakes = nearbyLocations.filter(l => l.waterbodyType === 'lake' && l.siteKind !== 'recreation_research')
+  const reservoirs = nearbyLocations.filter(l => l.waterbodyType === 'reservoir' || l.siteKind === 'crt_reservoir')
   const bathingWaters = nearbyLocations.filter(l => l.waterbodyType === 'bathing water')
+  // already defined above: recreationSites, crtReservoirs
 
   const sewageDischarges = nearbyLocations.filter(l => l.recentSewageDischarge?.occurred)
   const algaeAlerts = nearbyLocations.filter(l => l.algaeWarning?.active)
@@ -269,38 +363,78 @@ async function getOverviewForPostcode (postcode) {
     lakes,
     reservoirs,
     bathingWaters,
+    recreationSites,
+    crtReservoirs,
     sewageDischarges,
     algaeAlerts,
     pollutionIncidents,
     openPollutionIncidents,
     healthWarnings,
     avgRainfall,
-    summary: buildOverviewSummary(overallConfidence, sewageDischarges, algaeAlerts, pollutionIncidents, avgRainfall, isLiveData, nearbyLocations.length)
+    summary: buildOverviewSummary({
+      confidence: overallConfidence,
+      sewage: sewageDischarges,
+      algae: algaeAlerts,
+      pollution: pollutionIncidents,
+      rainfall: avgRainfall,
+      isLiveData,
+      locationCount: nearbyLocations.length,
+      bathingCount: designatedBathingWaters.length,
+      recreationCount: recreationSites.length,
+      crtCount: crtReservoirs.length
+    })
   }
 }
 
-function buildOverviewSummary (confidence, sewage, algae, pollution, rainfall, isLiveData, locationCount) {
+function buildOverviewSummary ({
+  confidence,
+  sewage,
+  algae,
+  pollution,
+  rainfall,
+  isLiveData,
+  locationCount,
+  bathingCount,
+  recreationCount,
+  crtCount
+}) {
   const parts = []
 
   if (isLiveData) {
-    parts.push(`Showing ${locationCount} nearest designated bathing waters from the Environment Agency.`)
+    const bits = []
+    if (bathingCount > 0) bits.push(`${bathingCount} designated bathing water${bathingCount === 1 ? '' : 's'}`)
+    if (recreationCount > 0) bits.push(`${recreationCount} reported recreation site${recreationCount === 1 ? '' : 's'}`)
+    if (crtCount > 0) bits.push(`${crtCount} Canal & River Trust reservoir${crtCount === 1 ? '' : 's'}`)
+    if (bits.length) {
+      parts.push(`Showing nearby places: ${bits.join(', ')}.`)
+    } else {
+      parts.push(`Showing ${locationCount} nearby water place${locationCount === 1 ? '' : 's'}.`)
+    }
     if (rainfall != null) {
-      parts.push('Rainfall totals are from the Met Office.')
+      parts.push('Rainfall totals are from the Met Office where available.')
     }
   } else if (locationCount === 0) {
-    parts.push('No designated bathing waters were found near this postcode.')
+    parts.push('No water locations were found near this postcode.')
   }
 
   if (locationCount === 0) {
     return parts.join(' ') || 'No water locations found for this postcode.'
   }
 
-  if (confidence === 'good') {
-    parts.push('Conditions across nearby bathing waters are generally good for recreational water use.')
-  } else if (confidence === 'caution') {
-    parts.push('Some nearby bathing waters need extra caution.')
+  if (bathingCount > 0) {
+    if (confidence === 'good') {
+      parts.push('Conditions across nearby designated bathing waters are generally good for recreational water use.')
+    } else if (confidence === 'caution') {
+      parts.push('Some nearby designated bathing waters need extra caution.')
+    } else {
+      parts.push('Several nearby designated bathing waters have poor conditions. Check individual locations before visiting.')
+    }
   } else {
-    parts.push('Several nearby bathing waters have poor conditions. Check individual locations before visiting.')
+    parts.push('No designated bathing waters are in this list — nearby places have limited official swimming monitoring.')
+  }
+
+  if (recreationCount > 0 || crtCount > 0) {
+    parts.push('Extra recreation and reservoir places are shown for discovery; they are not the same as Swimfo designated bathing waters.')
   }
 
   if (sewage.length > 0) {
@@ -378,7 +512,7 @@ function getStatusLabel (status) {
     'not permitted': 'Not permitted',
     'permit required': 'Permit required',
     restricted: 'Restricted',
-    unknown: 'Unknown'
+    unknown: 'Limited evidence'
   }
   return labels[status] || status
 }
@@ -388,9 +522,22 @@ function getWaterbodyTypeLabel (type) {
     river: 'River',
     lake: 'Lake',
     reservoir: 'Reservoir',
-    'bathing water': 'Designated bathing water'
+    coastal: 'Coastal / estuarine',
+    canal: 'Canal',
+    water: 'Waterbody',
+    'bathing water': 'Designated bathing water',
+    'recreation site': 'Reported recreation site'
   }
   return labels[type] || type
+}
+
+function getSiteKindLabel (siteKind) {
+  const labels = {
+    recreation_research: 'Reported recreation area',
+    crt_reservoir: 'CRT reservoir',
+    designated_bathing_water: 'Designated bathing water'
+  }
+  return labels[siteKind] || null
 }
 
 module.exports = {
@@ -408,5 +555,6 @@ module.exports = {
   formatDate,
   formatRelativeTime,
   getStatusLabel,
-  getWaterbodyTypeLabel
+  getWaterbodyTypeLabel,
+  getSiteKindLabel
 }

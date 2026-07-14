@@ -30,7 +30,9 @@ function enrichLocation (location, postcode) {
     isLiveData: Boolean(location.isLiveData),
     postcodeParam: encodeURIComponent(postcode || location.postcode),
     statusLabel: waterService.getStatusLabel(location.overallStatus),
-    waterbodyTypeLabel: waterService.getWaterbodyTypeLabel(location.waterbodyType)
+    waterbodyTypeLabel: waterService.getWaterbodyTypeLabel(location.waterbodyType),
+    siteKindLabel: waterService.getSiteKindLabel(location.siteKind),
+    limitedEvidence: Boolean(location.limitedEvidence)
   }
 }
 
@@ -89,7 +91,8 @@ function getMarkerColor (status) {
   const colors = {
     good: '#00703c',
     caution: '#f47738',
-    poor: '#d4351c'
+    poor: '#d4351c',
+    unknown: '#505a5f'
   }
   return colors[status] || '#1d70b8'
 }
@@ -126,12 +129,14 @@ function buildMapConfig (locations, postcode, areaName) {
       url: `/location/${location.id}?postcode=${encodeURIComponent(postcode)}`,
       markerColor: getMarkerColor(location.overallStatus),
       warnings: [
+        location.limitedEvidence ? 'Limited water quality evidence' : null,
         location.recentSewageDischarge.occurred ? 'Recent sewage discharge' : null,
         location.algaeWarning.active ? 'Algae alert' : null,
         location.healthWarning.active ? 'Health warning' : null,
         location.pollutionIncidents.length > 0 ? 'Pollution incident' : null
       ].filter(Boolean),
       isLiveData: Boolean(location.isLiveData),
+      limitedEvidence: Boolean(location.limitedEvidence),
       dataProvenance: dataProvenance.getLocationProvenance(location)
     }))
   }
@@ -200,6 +205,9 @@ router.get('/overview', async (req, res, next) => {
     overview.lakes = overview.lakes.map(loc => enrichLocation(loc, overview.postcode))
     overview.reservoirs = overview.reservoirs.map(loc => enrichLocation(loc, overview.postcode))
     overview.bathingWaters = overview.bathingWaters.map(loc => enrichLocation(loc, overview.postcode))
+    overview.recreationSites = (overview.recreationSites || []).map(loc => enrichLocation(loc, overview.postcode))
+    overview.crtReservoirs = (overview.crtReservoirs || []).map(loc => enrichLocation(loc, overview.postcode))
+    overview.hasDiscoverySites = overview.recreationSites.length > 0 || overview.crtReservoirs.length > 0
     overview.isMockData = dataProvenance.isOverviewDemo(overview)
     overview.factorProvenance = {
       rainfall: dataProvenance.getOverviewFactorProvenance(overview, 'rainfall'),
@@ -228,6 +236,7 @@ router.get('/map', async (req, res, next) => {
     const isLiveData = locations.some(loc => loc.isLiveData)
     const isSewageLiveData = locations.some(loc => loc.recentSewageDischarge?.isLiveData)
     const isPollutionLiveData = locations.some(loc => loc.isPollutionLiveData)
+    const hasDiscoverySites = locations.some(loc => loc.limitedEvidence)
 
     res.render('map', {
       postcode: normalised,
@@ -235,6 +244,7 @@ router.get('/map', async (req, res, next) => {
       isLiveData,
       isSewageLiveData,
       isPollutionLiveData,
+      hasDiscoverySites,
       isMockData: !isLiveData,
       isMetOfficeConnected: metOfficeClient.isConfigured(),
       isOsMapsConnected: osMapsClient.isConfigured(),
