@@ -1,0 +1,59 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": 2,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.99475033053819,
+          53.3248207924098
+        ]
+      },
+      "properties": {
+        "OBJECTID": 2,
+        "sap_func_loc": "YL-001-001",
+        "sap_description": "Toddbrook Reservoir",
+        "sap_object_type": "012",
+        "waterway_name": "Toddbrook Feeder (Peak Forest Canal)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.8338307837597,
+          52.3625314448955
+        ]
+      },
+      "properties": {
+        "OBJECTID": 3,
+        "sap_func_loc": "RQ-001-003",
+        "sap_description": "Earlswood Reservoirs, Windmill Pool",
+        "sap_object_type": "012",
+        "waterway_name": "Engine Pool Feeder (N Stratford Cnl)"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.84372562427507,
+          52.3633358947357
+        ]
+      },
+      "properties": {
+        "OBJECTID": 4,
+        "sap_func_loc": "RQ-001-001",
+        "sap_description": "Earlswood Reservoirs, Terrys Pool",
+        "sap_object_type": "012",
+        "waterway_name": "Engine Pool Feeder (N Stratford Cnl)"
+      }
+    }
+  ]
+}
