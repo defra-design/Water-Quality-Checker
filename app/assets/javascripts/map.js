@@ -12,13 +12,23 @@ window.GOVUKPrototypeKit.documentReady(() => {
   }
 
   const mapData = JSON.parse(dataElement.textContent)
+
+  // MapLibre fetches the style URL from the browser; keep relative paths absolute
+  // so the request always hits this app (avoids first-load misses with workers).
+  if (mapData.mapStyle?.url && mapData.mapStyle.url.startsWith('/')) {
+    mapData.mapStyle.url = window.location.origin + mapData.mapStyle.url
+  }
+
   const interactPlugin = defra.interactPlugin({
     interactionModes: ['selectMarker'],
     deselectOnClickOutside: true
   })
 
   const map = new defra.InteractiveMap(mapContainerId, {
-    behaviour: 'hybrid',
+    // Inline always mounts the map on this dedicated page. Hybrid/buttonFirst
+    // only shows an "open map" control below ~835px, which reads as "map didn't
+    // load" on first visit (especially tablets / narrow laptop windows).
+    behaviour: 'inline',
     mapLabel: mapData.mapLabel,
     pageTitle: mapData.pageTitle,
     mapProvider: defra.maplibreProvider(),
@@ -29,9 +39,10 @@ window.GOVUKPrototypeKit.documentReady(() => {
     },
     bounds: mapData.bounds,
     containerHeight: '480px',
-    hybridWidth: 835,
     plugins: [interactPlugin]
   })
+
+  let markersReady = false
 
   function buildPanelHtml (location) {
     const provenanceLabel = location.isLiveData
@@ -62,7 +73,10 @@ window.GOVUKPrototypeKit.documentReady(() => {
     }
   }
 
-  map.on('map:ready', () => {
+  function setupMarkersAndPanel () {
+    if (markersReady) return
+    markersReady = true
+
     mapData.locations.forEach((location) => {
       map.addMarker(location.id, location.coords, {
         label: `${location.name} – ${location.statusLabel}`,
@@ -80,6 +94,19 @@ window.GOVUKPrototypeKit.documentReady(() => {
       tablet: { slot: 'left-top', dismissible: true, width: '320px' },
       desktop: { slot: 'left-top', dismissible: true, width: '320px' }
     })
+  }
+
+  // map:ready can fire before the basemap style finishes loading. Prefer
+  // map:loaded / map:firstidle so the first paint gets tiles + markers together.
+  map.on('map:ready', setupMarkersAndPanel)
+  map.on('map:loaded', setupMarkersAndPanel)
+  map.on('map:firstidle', () => {
+    setupMarkersAndPanel()
+    // MapLibre often needs a resize after the first style load if the
+    // container finished laying out after the map was constructed.
+    if (typeof map.resize === 'function') {
+      map.resize()
+    }
   })
 
   map.on('interact:selectionchange', ({ selectedMarkers }) => {

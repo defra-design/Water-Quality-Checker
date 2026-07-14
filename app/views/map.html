@@ -11,6 +11,10 @@
 {% block head %}
   {{ super() }}
   <link href="/plugin-assets/%40defra%2Finteractive-map/dist/css/index.css" rel="stylesheet" type="text/css">
+  {# Preload heavy MapLibre chunks so the first visit doesn't race the dynamic imports #}
+  <link rel="preload" href="/plugin-assets/%40defra%2Finteractive-map/dist/umd/im-core.js" as="script">
+  <link rel="preload" href="/plugin-assets/%40defra%2Finteractive-map/providers/maplibre/dist/umd/im-maplibre-framework.js" as="script">
+  <link rel="preload" href="/plugin-assets/%40defra%2Finteractive-map/providers/maplibre/dist/umd/im-maplibre-provider.js" as="script">
 {% endblock %}
 
 {% block bodyStart %}
